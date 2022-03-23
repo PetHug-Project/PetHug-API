@@ -8,13 +8,16 @@ module.exports = function (app) {
   const { Schema } = mongooseClient;
   const schema = new Schema({
     user_image: { type: String },
-    user_name: { type: String },
     fname: { type: String, required: true },
     lname: { type: String, required: true },
-    telno: { type: String, required: true },
-    email: { type: String },
+    email: { type: String, required: true },
+    gender: { type: String },
+    birthdate: { type: Date },
+    telno: { type: String },
     role: { type: String, default: 'user' },
     pets: { type: Array, default: [] },
+    firebase_uid: { type: String, required: true, unique: true },
+    sign_in_provider: { type: String, required: true }
   });
 
   // This is necessary to avoid model compilation errors in watch mode

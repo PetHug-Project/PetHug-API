@@ -6,5 +6,18 @@
     "default": 10,
     "max": 50
   },
-  "mongodb": "mongodb://taninchot:example@192.168.2.42:27017/pethug?authSource=admin"
+  "mongodb": "mongodb+srv://pethug:Taninchot_01@cluster0.carua.mongodb.net/pethug?authSource=admin",
+  "firebaseConfig": {
+    "apiKey": "AIzaSyAkqDkubTCnjZSQ7kPGG-RQFLZnLI924ew",
+    "authDomain": "pethug-project.firebaseapp.com",
+    "projectId": "pethug-project",
+    "storageBucket": "pethug-project.appspot.com",
+    "messagingSenderId": "347708187247",
+    "appId": "1:347708187247:web:91c7e0785a8bdeccdca39a",
+    "measurementId": "G-TZC7WCG3EH",
+    "private_key_id": "71717eda58a7143113fb5b860942b837e47cba5b",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC+XWYAVpgD3/CD\npNk4ONKQ0o3CXpKWyntr85ZHU/H/rFb0XpmXuNt7PHsHd2OIpdvgH1/EtgR1ADqO\n2AdK61dYotvjM2sVo6FpZFeQjPwmrmEESviXBOucQlEqEfyeJQ4wOYm/2FB1dPsK\nGyUFpikHEkFb+87Ix641YmKrPfOchqXieW9XJDQWn25QWAtr5Iom8RWZtmjjwMnY\n1YfnS6qzrISK+aN7i3JeVhWW96FpnVNwTSunAGb5KJ7Di4wKg830z8+BHsxhadcS\nbc4tnbr5xmzsLMRHsELD58sHlhgSr/sqPH3wtbmti2H0BZslXW/JlqXoif3HuZbR\nrMa4U7KLAgMBAAECggEANkmJWKhZMqWuv8QHpEZkGiPJhHgW4sS8nMT7Ar1YQnrh\n00+VCpUPll3hkfgEnQf7o7cexwjHTZxylqDZt45UuvS6s1jK/YFL+zO/2vuxvtA0\n35YHvX2MOWQaJF67xVe465zFAT5Nd6mUG8Yw8SL5CUi19ebiChUTw6qai84fhm/L\nYnqorDzhqQz/C/RrIEMWp6nomumPocLSi2nHXklcIPMyvk13UrsC+KY/nIULoz2R\nWvSGQ8wZcSg99gV45sEww7P3tu1FQzfCoop2J7kOJ4saDapj8bGcEL+o6CNLLbat\ns4Zfn2+1l01WnVSB2gON4hQ5Ht8+ZLrIrwJdtjRyeQKBgQDuGi9hXSaeX2E4nRmp\nkDwqrB/EVcijuAsCZ0UNMSeAzH28INJHANHhLvIZ9Z62eRIIqEXtCz7Qka0KdJh7\n6Tj45nuPwFhmcwKPLemaycdtncYBdFj5xNYTIiElhmq02auRGWsq5tTv7UNryj2q\n3Sjc8E3zNBjFpJhDPIRYzJ+MUwKBgQDMrJlf+mvZ8bHwWamM9jGYkU7hB71UCdYy\nawh3QkHMqOOE5kclB3LfFK1nrDbUSy9I1EMIAXLSzMtDWjWyGalaD3n8ovZnyZWL\n14skiFFOxNUJ1BL4K7N1p9kFBS07f/Hsf2WVnHbpo4fsX79ji+ZctRt60xCgpJVG\n+9c9t9e56QKBgQDkMAQoc3WHYjFyaF0nvCttWfg32V6oSMGEVCRBOFJ7hX8axPnB\nQm/iN3OenV610eIOmfYp7xUMHhCQbJ2WYzVOlNTmN5iA1sglIAM5bRfLXeFdk3uS\nI6pmO9c4d1HccJ+UN6AVRZPdPK3Yp8Hh9oIq+8I4yjzTbaLfDShpUfG2MQKBgEuo\nmeGyzl94StCQNG7ZKyg8vq3MkJ4aLMXibvS211/yJnigLzhu8nWoTRl/vZzoVghT\n/ptc/bcS4Sh6llLJzaJvCibrjq57A/73pIXSpku50w6ZCJIYhXQ+oaiLa1cNSr6j\nsUeG2SYwvzQPiM4hjvxCLnBOyVy4uj3NJpm39dTRAoGBAN40Gplqczh1eumyfCSU\nkbPR65U2FH+nxwDo2XxZnDbjGKSD1sq27QM4LQgOW7cerXmnsXtBwPyCdmFAMik4\nQ73ViX0ZK7Lz0OVV8lhWV1LjDlwXzo/ulgJNYMVAC4x5A+sWLdWcBbuxRdzd4NXH\nXCv7clvyS2DiIlsJADHP5y8x\n-----END PRIVATE KEY-----\n",
+    "client_email": "firebase-adminsdk-4xby0@pethug-project.iam.gserviceaccount.com",
+    "storage_bucket": "pethug-project.appspot.com"
+  }
 }

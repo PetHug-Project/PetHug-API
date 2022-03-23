@@ -15,6 +15,20 @@ module.exports = function (app) {
 
   // Get our initialized service so that we can register hooks
   const service = app.service('users');
-
   service.hooks(hooks);
+
+  app.use('/register/user', {
+    async create(data, params) {
+      return await users.registerUser(data, params)
+    }
+  })
+  app.service('/register/user').hooks(hooks)
+
+
+  app.use('/login/user', {
+    async create(data, params) {
+      return await users.loginUser(data, params)
+    }
+  })
+
 };

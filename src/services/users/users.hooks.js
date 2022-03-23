@@ -1,5 +1,4 @@
-
-
+const firebaseAuth = require("../../hooks/firebase-auth")
 module.exports = {
   before: {
     all: [],
