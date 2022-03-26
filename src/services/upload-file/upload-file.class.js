@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-const firebaseAdmin = require("../../utils/firebaseInit")
+const { firebaseAdmin } = require("../../utils/firebaseInit")
 const sharp = require("sharp")
 
 exports.UploadFile = class UploadFile {

@@ -23,6 +23,9 @@ module.exports = function (app) {
       name: 'img'
     }
   ]), async (req, res, next) => {
+    if (!req.files) {
+      return res.status(500).send({ error: "Please send image to upload" })
+    }
     req.feathers.files = req.files.img
     next()
   }, {
