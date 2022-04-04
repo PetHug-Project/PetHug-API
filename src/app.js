@@ -19,6 +19,12 @@ const app = express(feathers())
 
 // Load app configuration
 app.configure(configuration())
+
+// Health Check
+app.get('/health', (req, res) => {
+  return res.status(200).send({ status: 'Healthy' })
+})
+
 // Enable security, CORS, compression, favicon and body parsing
 app.use(helmet({
   contentSecurityPolicy: false
