@@ -24,7 +24,6 @@ module.exports = function (app) {
   })
   // app.service('/register/user').hooks(hooks)
 
-
   app.use('/auth/login/user', {
     async create(data, params) {
       return await users.loginUser(data, params)
