@@ -1,7 +1,7 @@
 const { BadRequest } = require('@feathersjs/errors');
 const { default: axios } = require('axios');
 const { Service } = require('feathers-mongoose');
-const { firebaseAdmin, firebaseAuth } = require("../../utils/firebaseInit")
+const { firebaseAdmin, firebaseAuth, firebaseApiKey } = require("../../utils/firebaseInit")
 
 const firebaseAdminAuth = firebaseAdmin.auth()
 exports.Users = class Users extends Service {
@@ -37,7 +37,7 @@ exports.Users = class Users extends Service {
 
   async refreshToken(data, params) {
     let { refreshToken } = data
-    let apiKey = this.app.get("firebaseConfig").apiKey
+    let apiKey = firebaseApiKey
     let refreshTokenURL = `https://securetoken.googleapis.com/v1/token?key=${apiKey}`
     let result = await axios.post(refreshTokenURL, { refresh_token: refreshToken, grant_type: "refresh_token" })
       .catch((error) => {

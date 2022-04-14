@@ -7,5 +7,5 @@ firebaseInit(firebaseConfig)
 const firebaseAdmin = require("firebase-admin")
 const firebaseAuth = require("firebase/auth")
 
-module.exports = { firebaseAdmin, firebaseAuth }
+module.exports = { firebaseAdmin, firebaseAuth, firebaseApiKey: firebaseConfig.apiKey }
 

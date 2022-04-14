@@ -5,7 +5,8 @@ const { firebaseAdmin } = require("../utils/firebaseInit")
 
 const firebaseAuth = firebaseAdmin.auth()
 
-const { NotAuthenticated } = require('@feathersjs/errors')
+const { NotAuthenticated } = require('@feathersjs/errors');
+const { AuthError } = require("../constants/AuthError");
 
 module.exports = (options = {}) => {
   return async context => {
@@ -17,9 +18,17 @@ module.exports = (options = {}) => {
     if (!accessToken) {
       throw new NotAuthenticated("Please send token in format: Bearer <token>")
     }
-    let user = await firebaseAuth.verifyIdToken(accessToken)
-    if (!user) {
-      throw new NotAuthenticated('Invalid token')
+    let user
+    try {
+      user = await firebaseAuth.verifyIdToken(accessToken)
+    } catch (error) {
+      if (error.code == "auth/id-token-expired") {
+        throw new NotAuthenticated(AuthError.TOKEN_EXPIRED, error)
+      }
+      if (error.code == "auth/argument-error") {
+        throw new NotAuthenticated(AuthError.TOKEN_INVALID, error)
+      }
+      throw new NotAuthenticated(error.message, error)
     }
     if (!user.email_verified) {
       await firebaseAuth.updateUser(user.uid, { emailVerified: true })
