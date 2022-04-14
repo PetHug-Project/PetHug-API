@@ -17,17 +17,23 @@ module.exports = function (app) {
   const service = app.service('users');
   service.hooks(hooks);
 
-  app.use('/register/user', {
+  app.use('/auth/register/user', {
     async create(data, params) {
       return await users.registerUser(data, params)
     }
   })
-  app.service('/register/user').hooks(hooks)
+  // app.service('/register/user').hooks(hooks)
 
 
-  app.use('/login/user', {
+  app.use('/auth/login/user', {
     async create(data, params) {
       return await users.loginUser(data, params)
+    }
+  })
+
+  app.use("/auth/refresh", {
+    async create(data, params) {
+      return await users.refreshToken(data, params)
     }
   })
 
