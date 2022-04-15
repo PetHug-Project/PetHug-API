@@ -18,7 +18,7 @@ module.exports = function (app) {
 
   // Initialize our service with any options it requires
   const uploadFile = new UploadFile(options, app)
-  app.use('/upload-file-single', multer.fields([
+  app.use('/upload-image-single', multer.fields([
     {
       name: 'img',
       maxCount: 1
@@ -31,7 +31,7 @@ module.exports = function (app) {
     next()
   }, {
     async create(data, params) {
-      return await uploadFile.handleSingleFile(params)
+      return await uploadFile.handleSingleImage(params)
     }
   })
 };

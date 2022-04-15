@@ -8,11 +8,11 @@ exports.UploadFile = class UploadFile {
     this.app = app
   }
 
-  async handleSingleFile(params) {
+  async handleSingleImage(params) {
     const { files } = params
     const file = files[0]
     const fileName = await this.resizeAndUpload(file)
-    return { images_name: fileName }
+    return { image_name: fileName }
   }
 
   async handleFile(params) {
