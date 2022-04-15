@@ -1,0 +1,4 @@
+exports.AuthError = {
+  TOKEN_EXPIRED: "TOKEN EXPIRED",
+  TOKEN_INVALID: "INVALID TOKEN",
+}
