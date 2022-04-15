@@ -1,4 +1,4 @@
-const { BadRequest } = require('@feathersjs/errors');
+const { BadRequest, Forbidden } = require('@feathersjs/errors');
 const { default: axios } = require('axios');
 const { Service } = require('feathers-mongoose');
 const { firebaseAdmin, firebaseAuth, firebaseApiKey } = require("../../utils/firebaseInit")
@@ -8,6 +8,12 @@ exports.Users = class Users extends Service {
   constructor(options, app) {
     super(options, app)
     this.app = app
+  }
+
+  modelProtector(data) {
+    delete data.firebase_uid
+    delete data.sign_in_provider
+    delete data.__v
   }
 
   async registerUser(data, params) {
@@ -47,4 +53,22 @@ exports.Users = class Users extends Service {
     return { accessToken: result.access_token, refreshToken: result.refresh_token }
   }
 
+  async getUser(id, params) {
+    let checkUser = await this.checkUser(id, params)
+    if (!checkUser) {
+      return new Forbidden("Can't view this user")
+    }
+    let user = await super.get(id, params)
+    this.modelProtector(user)
+    return user
+  }
+
+  async checkUser(id, params) {
+    let { decodeAccessToken } = params
+    let userFromUserId = await super.get(id, { query: { $select: ["firebase_uid"] } })
+    if (userFromUserId.firebase_uid == decodeAccessToken.user_id) {
+      return true
+    }
+    return false
+  }
 };
