@@ -3,9 +3,18 @@ const { firebaseAdmin } = require("../../utils/firebaseInit")
 const sharp = require("sharp")
 
 exports.UploadFile = class UploadFile {
-  constructor(options) {
+  constructor(options, app) {
     this.options = options || {};
+    this.app = app
   }
+
+  async handleSingleFile(params) {
+    const { files } = params
+    const file = files[0]
+    const fileName = await this.resizeAndUpload(file)
+    return { images_name: fileName }
+  }
+
   async handleFile(params) {
     const { files } = params
     const fileNameArr = []
@@ -16,6 +25,7 @@ exports.UploadFile = class UploadFile {
     }
     return { images_name: fileNameArr }
   }
+
   async resizeAndUpload(file) {
     const bucket = firebaseAdmin.storage().bucket()
     const fileName = `${Date.now()}_${file.originalname.replace(/\s/g, "_")}`

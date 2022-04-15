@@ -18,24 +18,20 @@ module.exports = function (app) {
 
   // Initialize our service with any options it requires
   const uploadFile = new UploadFile(options, app)
-  app.use('/upload-file', multer.fields([
+  app.use('/upload-file-single', multer.fields([
     {
-      name: 'img'
+      name: 'img',
+      maxCount: 1
     }
   ]), async (req, res, next) => {
-    if (!req.files) {
+    if (!req.files || !req.files.img) {
       return res.status(500).send({ error: "Please send image to upload" })
     }
     req.feathers.files = req.files.img
     next()
   }, {
     async create(data, params) {
-      return await uploadFile.handleFile(params)
+      return await uploadFile.handleSingleFile(params)
     }
-  });
-
-  // Get our initialized service so that we can register hooks
-  const service = app.service('upload-file');
-
-  service.hooks(hooks);
+  })
 };
