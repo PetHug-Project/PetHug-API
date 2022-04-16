@@ -1,4 +1,4 @@
-const { BadRequest, Forbidden } = require('@feathersjs/errors');
+const { BadRequest, Forbidden, NotFound, NotAuthenticated } = require('@feathersjs/errors');
 const { default: axios } = require('axios');
 const { Service } = require('feathers-mongoose');
 const { AuthError } = require('../../constants/AuthError');
@@ -77,10 +77,27 @@ exports.Users = class Users extends Service {
 
   async checkUser(id, params) {
     let { decodeAccessToken } = params
+    if (!decodeAccessToken) {
+      throw new NotAuthenticated("Please provide Access Token")
+    }
     let userFromUserId = await super.get(id, { query: { $select: ["firebase_uid"] } })
     if (userFromUserId.firebase_uid == decodeAccessToken.user_id) {
       return true
     }
     return false
   }
+
+  async getModel() {
+    return super.Model
+  }
+
+  async findPetByUserId(params) {
+    let { user_id } = params.route
+    let checkUser = await this.checkUser(user_id, params)
+    if (!checkUser) {
+      return new Forbidden("Can't view this user")
+    }
+    return await this.app.service('pets').findPetByUserId(user_id)
+  }
+
 };

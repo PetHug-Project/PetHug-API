@@ -2,6 +2,7 @@
 const { Users } = require('./users.class');
 const createModel = require('../../models/users.model');
 const hooks = require('./users.hooks');
+const firebaseAuth = require("../../hooks/firebase-auth-hook");
 
 module.exports = function (app) {
   const options = {
@@ -40,4 +41,15 @@ module.exports = function (app) {
     }
   })
   app.service('/user').hooks(hooks)
+
+  app.use('/user/:user_id/pets', {
+    async find(params) {
+      return await users.findPetByUserId(params)
+    }
+  })
+  app.service('/user/:user_id/pets').hooks({
+    before: {
+      all: [firebaseAuth()],
+    }
+  })
 };

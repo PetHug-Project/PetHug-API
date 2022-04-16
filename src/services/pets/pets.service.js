@@ -10,10 +10,22 @@ module.exports = function (app) {
   };
 
   // Initialize our service with any options it requires
-  app.use('/pets', new Pets(options, app));
+  const pets = new Pets(options, app)
 
+  // Use for service
+  app.use('/pets', pets)
   // Get our initialized service so that we can register hooks
-  const service = app.service('pets');
+  app.service('pets').hooks(hooks)
 
-  service.hooks(hooks);
+  app.use('/pet', {
+    async get(id, params) {
+      return await pets.get(id, params)
+    },
+    async create(data, params) {
+      return await pets.createPet(data, params)
+    },
+    async patch(id, data, params) {
+      return await pets.patch(id, data, params)
+    }
+  })
 };
