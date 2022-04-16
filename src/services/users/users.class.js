@@ -1,7 +1,8 @@
-const { BadRequest, Forbidden } = require('@feathersjs/errors');
+const { BadRequest, Forbidden, NotFound } = require('@feathersjs/errors');
 const { default: axios } = require('axios');
 const { Service } = require('feathers-mongoose');
 const { firebaseAdmin, firebaseAuth, firebaseApiKey } = require("../../utils/firebaseInit")
+const ObjectId = require("mongoose").Types.ObjectId
 
 const firebaseAdminAuth = firebaseAdmin.auth()
 exports.Users = class Users extends Service {
@@ -58,8 +59,43 @@ exports.Users = class Users extends Service {
     if (!checkUser) {
       return new Forbidden("Can't view this user")
     }
-    let user = await super.get(id, params)
+    let aggregateQuery = [{
+      $match: {
+        _id: ObjectId(id)
+      }
+    },
+    {
+      $lookup: {
+        from: "pets",
+        pipeline: [
+          {
+            $match: {
+              "owner._id": ObjectId(id)
+            }
+          },
+          {
+            $project: {
+              pet_image: "$pet_image",
+              pet_name: "$pet_name",
+              pet_birthdate: "$pet_birthdate"
+            }
+          }
+        ],
+        as: "pets"
+      }
+    }]
+    let user = await super.Model.aggregate(aggregateQuery)
+    if (user.length == 0) {
+      return new NotFound("Can't find this user")
+    }
+    user = user[0]
     this.modelProtector(user)
+    if (user.pets.length > 0) {
+      user.pets.map(async (item) => {
+        let age = await this.app.service('pets').calculateAge(item.pet_birthdate)
+        item.pet_age = age
+      })
+    }
     return user
   }
 
@@ -71,4 +107,9 @@ exports.Users = class Users extends Service {
     }
     return false
   }
+
+  async getModel() {
+    return super.Model
+  }
+
 };
