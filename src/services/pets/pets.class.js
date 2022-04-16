@@ -19,7 +19,7 @@ exports.Pets = class Pets extends Service {
     return petDetail
   }
 
-  async calculateAge(birthdate) {
+  calculateAge(birthdate) {
     const now = dayjs()
     const birthdateDayjs = dayjs(birthdate)
     const age = {
@@ -27,6 +27,15 @@ exports.Pets = class Pets extends Service {
       months: now.diff(birthdateDayjs, 'month') - (now.diff(birthdateDayjs, 'year') * 12),
     }
     return age
+  }
+
+  async findPetByUserId(userID) {
+    let pets = await super.find({ owner_id: userID, query: { $select: ["pet_image", "pet_name", "pet_birthdate"] } })
+    pets.data = pets.data.map(pet => {
+      pet.age = this.calculateAge(pet.pet_birthdate)
+      return pet
+    })
+    return pets
   }
 
 };

@@ -1,8 +1,7 @@
-const { BadRequest, Forbidden, NotFound } = require('@feathersjs/errors');
+const { BadRequest, Forbidden, NotFound, NotAuthenticated } = require('@feathersjs/errors');
 const { default: axios } = require('axios');
 const { Service } = require('feathers-mongoose');
 const { firebaseAdmin, firebaseAuth, firebaseApiKey } = require("../../utils/firebaseInit")
-const ObjectId = require("mongoose").Types.ObjectId
 
 const firebaseAdminAuth = firebaseAdmin.auth()
 exports.Users = class Users extends Service {
@@ -59,48 +58,16 @@ exports.Users = class Users extends Service {
     if (!checkUser) {
       return new Forbidden("Can't view this user")
     }
-    let aggregateQuery = [{
-      $match: {
-        _id: ObjectId(id)
-      }
-    },
-    {
-      $lookup: {
-        from: "pets",
-        pipeline: [
-          {
-            $match: {
-              "owner._id": ObjectId(id)
-            }
-          },
-          {
-            $project: {
-              pet_image: "$pet_image",
-              pet_name: "$pet_name",
-              pet_birthdate: "$pet_birthdate"
-            }
-          }
-        ],
-        as: "pets"
-      }
-    }]
-    let user = await super.Model.aggregate(aggregateQuery)
-    if (user.length == 0) {
-      return new NotFound("Can't find this user")
-    }
-    user = user[0]
+    let user = await super.get(id, params)
     this.modelProtector(user)
-    if (user.pets.length > 0) {
-      user.pets.map(async (item) => {
-        let age = await this.app.service('pets').calculateAge(item.pet_birthdate)
-        item.pet_age = age
-      })
-    }
     return user
   }
 
   async checkUser(id, params) {
     let { decodeAccessToken } = params
+    if (!decodeAccessToken) {
+      throw new NotAuthenticated("Please provide Access Token")
+    }
     let userFromUserId = await super.get(id, { query: { $select: ["firebase_uid"] } })
     if (userFromUserId.firebase_uid == decodeAccessToken.user_id) {
       return true
@@ -110,6 +77,15 @@ exports.Users = class Users extends Service {
 
   async getModel() {
     return super.Model
+  }
+
+  async findPetByUserId(params) {
+    let { user_id } = params.route
+    let checkUser = await this.checkUser(user_id, params)
+    if (!checkUser) {
+      return new Forbidden("Can't view this user")
+    }
+    return await this.app.service('pets').findPetByUserId(user_id)
   }
 
 };
