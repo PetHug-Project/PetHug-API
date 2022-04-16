@@ -1,6 +1,7 @@
 const { BadRequest, Forbidden } = require('@feathersjs/errors');
 const { default: axios } = require('axios');
 const { Service } = require('feathers-mongoose');
+const { AuthError } = require('../../constants/AuthError');
 const { firebaseAdmin, firebaseAuth, firebaseApiKey } = require("../../utils/firebaseInit")
 
 const firebaseAdminAuth = firebaseAdmin.auth()
@@ -34,7 +35,18 @@ exports.Users = class Users extends Service {
 
   async loginUser(data, params) {
     let { email, password } = data
-    let result = await firebaseAuth.signInWithEmailAndPassword(firebaseAuth.getAuth(), email, password)
+    let result
+    try {
+      result = await firebaseAuth.signInWithEmailAndPassword(firebaseAuth.getAuth(), email, password)
+    } catch (error) {
+      if (error.code == "auth/user-not-found") {
+        throw new BadRequest(AuthError.USER_NOT_FOUND, error)
+      }
+      if (error.code == "auth/wrong-password") {
+        throw new BadRequest(AuthError.WRONG_PASSWORD, error)
+      }
+      throw new Error(error)
+    }
     let { uid, stsTokenManager: token } = result.user
     delete token.expirationTime
     let user = await super.Model.findOne({ firebase_uid: uid })
