@@ -13,15 +13,20 @@ exports.Pets = class Pets extends Service {
     let { owner_id, pet_name } = data
     let userModel = await this.app.service("users").getModel()
     let owner = await userModel.findOne({ _id: owner_id })
+    if (!owner) {
+      throw new BadRequest("User not found")
+    }
     owner = owner.toObject()
+    owner.id = owner._id.toString()
+    delete owner._id
     await this.app.service('users').modelProtector(owner)
     delete owner.pets
-    let foundPet = await super.find({ query: { pet_name: pet_name, "owner._id": ObjectId(owner_id) } })
+    let foundPet = await super.find({ query: { pet_name: pet_name, "owner.id": owner_id } })
     if (foundPet.total > 0) {
       throw new BadRequest("Pet already exists")
     }
     let petDetail = await super.create({ ...data, owner: owner })
-    await userModel.updateOne({ _id: owner_id }, { $push: { pets: petDetail._id } })
+    await userModel.updateOne({ _id: owner_id }, { $push: { pets: petDetail._id.toString() } })
     return petDetail
   }
 
