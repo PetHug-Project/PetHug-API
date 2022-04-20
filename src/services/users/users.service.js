@@ -11,40 +11,40 @@ module.exports = function (app) {
   };
 
   // Initialize our service with any options it requires
-  const users = new Users(options, app)
-  app.use('/users', users)
+  const userService = new Users(options, app)
+  app.use('/users-service', userService)
 
   // Get our initialized service so that we can register hooks
-  app.service('users')
+  app.service('users-service')
 
   app.use('/auth/register/user', {
     async create(data, params) {
-      return await users.registerUser(data, params)
+      return await userService.registerUser(data, params)
     }
   })
 
   app.use('/auth/login/user', {
     async create(data, params) {
-      return await users.loginUser(data, params)
+      return await userService.loginUser(data, params)
     }
   })
 
   app.use("/auth/refresh", {
     async create(data, params) {
-      return await users.refreshToken(data, params)
+      return await userService.refreshToken(data, params)
     }
   })
 
   app.use('/user', {
     async get(id, params) {
-      return await users.getUser(id, params)
+      return await userService.getUser(id, params)
     }
   })
   app.service('/user').hooks(hooks)
 
   app.use('/user/:user_id/pets', {
     async find(params) {
-      return await users.findPetByUserId(params)
+      return await userService.findPetByUserId(params)
     }
   })
   app.service('/user/:user_id/pets').hooks({

@@ -10,10 +10,8 @@ module.exports = function (app) {
   };
 
   // Initialize our service with any options it requires
-  app.use('/pet-history', new PetHistory(options, app));
+  const petHistoryService = new PetHistory(options, app)
+  app.use('/pet-history-service', petHistoryService)
+  app.service('pet-history-service').hooks(hooks)
 
-  // Get our initialized service so that we can register hooks
-  const service = app.service('pet-history');
-
-  service.hooks(hooks);
 };

@@ -1,7 +1,6 @@
 const { Service } = require('feathers-mongoose');
 const dayjs = require("dayjs")
 const { BadRequest } = require("@feathersjs/errors")
-const ObjectId = require("mongoose").Types.ObjectId
 
 exports.Pets = class Pets extends Service {
   constructor(options, app) {
@@ -11,7 +10,7 @@ exports.Pets = class Pets extends Service {
 
   async createPet(data, params) {
     let { owner_id, pet_name } = data
-    let userModel = await this.app.service("users").getModel()
+    let userModel = await this.app.service("users-service").getModel()
     let owner = await userModel.findOne({ _id: owner_id })
     if (!owner) {
       throw new BadRequest("User not found")
@@ -19,7 +18,7 @@ exports.Pets = class Pets extends Service {
     owner = owner.toObject()
     owner.id = owner._id.toString()
     delete owner._id
-    await this.app.service('users').modelProtector(owner)
+    await this.app.service('users-service').modelProtector(owner)
     delete owner.pets
     let foundPet = await super.find({ query: { pet_name: pet_name, "owner.id": owner_id } })
     if (foundPet.total > 0) {
