@@ -1,5 +1,7 @@
 const { Service } = require('feathers-mongoose');
 const dayjs = require("dayjs")
+const { BadRequest } = require("@feathersjs/errors")
+const ObjectId = require("mongoose").Types.ObjectId
 
 exports.Pets = class Pets extends Service {
   constructor(options, app) {
@@ -8,12 +10,16 @@ exports.Pets = class Pets extends Service {
   }
 
   async createPet(data, params) {
-    let { owner_id } = data
+    let { owner_id, pet_name } = data
     let userModel = await this.app.service("users").getModel()
     let owner = await userModel.findOne({ _id: owner_id })
     owner = owner.toObject()
     await this.app.service('users').modelProtector(owner)
     delete owner.pets
+    let foundPet = await super.find({ query: { pet_name: pet_name, "owner._id": ObjectId(owner_id) } })
+    if (foundPet.total > 0) {
+      throw new BadRequest("Pet already exists")
+    }
     let petDetail = await super.create({ ...data, owner: owner })
     await userModel.updateOne({ _id: owner_id }, { $push: { pets: petDetail._id } })
     return petDetail
