@@ -50,6 +50,11 @@ app.get('/health', (req, res) => {
   return res.status(200).send({ status: 'Healthy' })
 })
 
+app.get('/version', (req, res) => {
+  let version = require('../package.json').version
+  return res.send({ version: version })
+})
+
 // Set up Plugins and providers
 app.configure(express.rest())
 app.configure(socketio())
