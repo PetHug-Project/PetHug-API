@@ -30,10 +30,14 @@ jobs:
     steps:
       - name: Login ssh to remote server and deploy container
         uses: appleboy/ssh-action@master
+        env:
+          MONGO_ROOT_USERNAME: ${{ secrets.MONGO_ROOT_USERNAME  }}
+          MONGO_ROOT_PASSWORD: ${{ secrets.MONGO_ROOT_PASSWORD  }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
+          envs: MONGO_ROOT_USERNAME,MONGO_ROOT_PASSWORD
           script: |
             docker ps
             docker rm -f api
