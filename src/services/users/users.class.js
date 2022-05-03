@@ -97,7 +97,7 @@ exports.Users = class Users extends Service {
     if (!checkUser) {
       return new Forbidden("Can't view this user")
     }
-    return await this.app.service('pets').findPetByUserId(user_id)
+    return await this.app.service('pets-service').findPetByUserId(user_id)
   }
 
 };
