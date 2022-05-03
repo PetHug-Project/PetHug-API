@@ -39,6 +39,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           envs: MONGO_ROOT_USERNAME,MONGO_ROOT_PASSWORD
           script: |
+            export MONGO_ROOT_USERNAME=$MONGO_ROOT_USERNAME
+            export MONGO_ROOT_PASSWORD=$MONGO_ROOT_PASSWORD
             docker ps
             docker rm -f api
             docker pull ghcr.io/karnkm/pethug-project-api-dev:latest
