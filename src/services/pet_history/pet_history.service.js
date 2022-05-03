@@ -14,4 +14,19 @@ module.exports = function (app) {
   app.use('/pet-history-service', petHistoryService)
   app.service('pet-history-service').hooks(hooks)
 
-};
+  app.use('/pet-history', {
+    async find(params) {
+      return petHistoryService.getPetHistory(params)
+    },
+    async create(data, params) {
+      return petHistoryService.addPetHistory(data, params)
+    },
+    async patch(id, data, params) {
+      return petHistoryService.editPetHistory(id, data, params)
+    },
+    async remove(id, params) {
+      return petHistoryService.deletePetHistory(id, params)
+    }
+  })
+
+}
