@@ -48,4 +48,8 @@ exports.Pets = class Pets extends Service {
     return pets
   }
 
+  getModel() {
+    return super.Model
+  }
+
 };
