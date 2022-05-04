@@ -27,4 +27,10 @@ module.exports = function (app) {
       return await petService.patch(id, data, params)
     }
   })
+
+  app.use('/pet/:pet_id/qrcode', {
+    async find(params) {
+      return await petService.findPetFromQrcode(params)
+    }
+  })
 };

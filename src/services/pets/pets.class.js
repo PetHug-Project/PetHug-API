@@ -48,6 +48,17 @@ exports.Pets = class Pets extends Service {
     return pets
   }
 
+  async findPetFromQrcode(params) {
+    let { pet_id } = params.route
+    let petDetails = await super.get({ _id: pet_id }, { query: { $select: ["pet_image", "pet_name", "pet_birthdate", "pet_gender", "pet_type", "pet_breed", "pet_color", "isLost", "pet_lost_details"] } })
+    if (petDetails.isLost == true) {
+      return petDetails
+    }
+    delete petDetails.isLost
+    delete petDetails.pet_lost_details
+    return petDetails
+  }
+
   getModel() {
     return super.Model
   }
