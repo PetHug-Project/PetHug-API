@@ -41,10 +41,10 @@ jobs:
           script: |
             export MONGO_ROOT_USERNAME=$MONGO_ROOT_USERNAME
             export MONGO_ROOT_PASSWORD=$MONGO_ROOT_PASSWORD
-            docker ps
-            docker rm -f api
+            docker ps -a
+            docker-compose stop api
             docker pull ghcr.io/karnkm/pethug-project-api-dev:latest
             docker images
-            docker-compose up -d
+            docker-compose up -d api
             docker image prune -f
             docker ps -a
