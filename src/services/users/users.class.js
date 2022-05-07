@@ -57,18 +57,20 @@ exports.Users = class Users extends Service {
     let { refreshToken } = data
     let apiKey = firebaseApiKey
     let refreshTokenURL = `https://securetoken.googleapis.com/v1/token?key=${apiKey}`
-    let result = await axios.post(refreshTokenURL, { refresh_token: refreshToken, grant_type: "refresh_token" })
-      .catch((error) => {
-        throw new BadRequest(error.response.data.error.message, error.response.data.error)
-      })
-    result = result.data
+    let result
+    try {
+      result = await axios.post(refreshTokenURL, { refresh_token: refreshToken, grant_type: "refresh_token" })
+      result = result.data
+    } catch (error) {
+      throw new BadRequest(error.response.data.error.message, error.response.data.error)
+    }
     return { accessToken: result.access_token, refreshToken: result.refresh_token }
   }
 
   async getUser(id, params) {
     let checkUser = await this.checkUser(id, params)
     if (!checkUser) {
-      return new Forbidden("Can't view this user")
+      throw new Forbidden("Can't view this user")
     }
     let user = await super.get(id, params)
     this.modelProtector(user)
