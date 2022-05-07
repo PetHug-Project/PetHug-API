@@ -38,6 +38,9 @@ module.exports = function (app) {
   app.use('/user', {
     async get(id, params) {
       return await userService.getUser(id, params)
+    },
+    async patch(id, data, params) {
+      return await userService.patch(id, data, params)
     }
   })
   app.service('/user').hooks(hooks)

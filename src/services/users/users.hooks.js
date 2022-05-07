@@ -7,8 +7,8 @@ module.exports = {
     find: [],
     get: [firebaseAuth()],
     create: [],
-    update: [],
-    patch: [],
+    update: [firebaseAuth()],
+    patch: [firebaseAuth()],
     remove: []
   },
 

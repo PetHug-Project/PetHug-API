@@ -17,6 +17,16 @@ exports.Users = class Users extends Service {
     delete data.__v
   }
 
+  async patch(id, data, params) {
+    let checkUser = await this.checkUser(id, params)
+    if (!checkUser) {
+      throw new Forbidden("Can't edit this user")
+    }
+    const result = await super.patch(id, data, params)
+    this.modelProtector(result)
+    return result
+  }
+
   async registerUser(data, params) {
     let { email, password } = data
     let user = await firebaseAdminAuth.createUser({
