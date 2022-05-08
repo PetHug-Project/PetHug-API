@@ -107,7 +107,7 @@ exports.Users = class Users extends Service {
     let { user_id } = params.route
     let checkUser = await this.checkUser(user_id, params)
     if (!checkUser) {
-      return new Forbidden("Can't view this user")
+      throw new Forbidden("Can't view this user")
     }
     return await this.app.service('pets-service').findPetByUserId(user_id)
   }
