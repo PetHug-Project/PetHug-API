@@ -60,7 +60,7 @@ exports.Users = class Users extends Service {
     let { uid, stsTokenManager: token } = result.user
     delete token.expirationTime
     let user = await super.Model.findOne({ firebase_uid: uid })
-    return { _id: user._id, fname: user.fname, lname: user.lname, token: token }
+    return { _id: user._id, fname: user.fname, lname: user.lname, user_image: user.user_image, token: token }
   }
 
   async refreshToken(data, params) {
