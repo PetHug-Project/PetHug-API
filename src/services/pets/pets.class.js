@@ -8,6 +8,13 @@ exports.Pets = class Pets extends Service {
     this.app = app
   }
 
+  async get(id, params) {
+    let pet = await super.get(id, params)
+    let petHistory = await this.app.service("pet-history-service").Model.find({ pet_id: pet._id.toString() })
+    pet.pet_history = petHistory
+    return pet
+  }
+
   async createPet(data, params) {
     let { owner_id, pet_name } = data
     let userModel = await this.app.service("users-service").getModel()
