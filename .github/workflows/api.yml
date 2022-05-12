@@ -31,16 +31,11 @@ jobs:
       - name: Login ssh to remote server and deploy container
         uses: appleboy/ssh-action@master
         env:
-          MONGO_ROOT_USERNAME: ${{ secrets.MONGO_ROOT_USERNAME  }}
-          MONGO_ROOT_PASSWORD: ${{ secrets.MONGO_ROOT_PASSWORD  }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          envs: MONGO_ROOT_USERNAME,MONGO_ROOT_PASSWORD
           script: |
-            export MONGO_ROOT_USERNAME=$MONGO_ROOT_USERNAME
-            export MONGO_ROOT_PASSWORD=$MONGO_ROOT_PASSWORD
             docker ps -a
             docker-compose stop api
             docker pull ghcr.io/karnkm/pethug-project-api-dev:latest
