@@ -8,6 +8,10 @@ exports.UploadFile = class UploadFile {
     this.app = app
   }
 
+  async find() {
+    return {}
+  }
+
   async handleSingleImage(params) {
     const { files } = params
     const file = files[0]

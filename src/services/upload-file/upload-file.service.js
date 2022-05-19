@@ -18,6 +18,9 @@ module.exports = function (app) {
 
   // Initialize our service with any options it requires
   const uploadFile = new UploadFile(options, app)
+  app.use('/upload-service', uploadFile)
+  app.service('upload-service').hooks(hooks)
+
   app.use('/upload-image-single', multer.fields([
     {
       name: 'img',

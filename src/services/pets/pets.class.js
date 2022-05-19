@@ -1,6 +1,7 @@
 const { Service } = require('feathers-mongoose');
 const dayjs = require("dayjs")
 const { BadRequest } = require("@feathersjs/errors")
+const qrcode = require("qrcode")
 
 exports.Pets = class Pets extends Service {
   constructor(options, app) {
@@ -33,6 +34,8 @@ exports.Pets = class Pets extends Service {
     }
     let petDetail = await super.create({ ...data, owner: owner })
     await userModel.updateOne({ _id: owner_id }, { $push: { pets: petDetail._id.toString() } })
+    let qrCode = `${this.app.get('web_host')}/pet/${petDetail._id.toString()}`
+    petDetail = await super.patch(petDetail._id, { qr_code_for_show: await this.generateQRCode(qrCode) })
     return petDetail
   }
 
@@ -73,6 +76,17 @@ exports.Pets = class Pets extends Service {
 
   getModel() {
     return super.Model
+  }
+
+  async generateQRCode(text) {
+    let buffer = await qrcode.toBuffer(text, { type: 'png' })
+    let obj = {
+      buffer: buffer,
+      originalname: `${(require("crypto").randomBytes(5)).toString('hex')}-${dayjs().unix()}.png`
+    }
+    let petHistoryService = this.app.service("upload-service")
+    let result = await petHistoryService.resizeAndUpload(obj)
+    return result
   }
 
 };
