@@ -30,7 +30,6 @@ jobs:
     steps:
       - name: Login ssh to remote server and deploy container
         uses: appleboy/ssh-action@master
-        env:
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
