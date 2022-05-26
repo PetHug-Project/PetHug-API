@@ -9,10 +9,13 @@ module.exports = function (app) {
   const schema = new Schema({
     pet_id: { type: String, required: true },
     user_id: { type: String, required: true },
-    date: { type: Date, required: true },
+    treat_type: { type: String, required: true },
     treat_name: { type: String, required: true },
-    treat_description: { type: String, required: true },
-    hospital_name: { type: String, required: true },
+    treat_date: { type: Date, required: true },
+    next_appointment: { type: Date },
+    pet_notes: { type: String },
+    last_weight: { type: Number },
+    treat_images: { type: Array },
   }, {
     timestamps: true,
     collection: 'pet_history'
