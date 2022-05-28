@@ -22,6 +22,15 @@ exports.Users = class Users extends Service {
     if (!checkUser) {
       throw new Forbidden("Can't edit this user")
     }
+    let { email } = data
+    if (email) {
+      let user = await super.Model.findOne({ email: email })
+      if (user) {
+        if (user._id.toString() != id) {
+          throw new BadRequest("Email already exist")
+        }
+      }
+    }
     const result = await super.patch(id, data, params)
     this.modelProtector(result)
     return result
