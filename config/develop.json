@@ -1,0 +1,6 @@
+{
+  "host": "HOST",
+  "port": "PORT",
+  "mongodb": "MONGO_URL",
+  "web_host": "https://dev.pethug-project.com"
+}

@@ -7,13 +7,13 @@ module.exports = function (app) {
   const mongooseClient = app.get('mongooseClient');
   const { Schema } = mongooseClient;
   const schema = new Schema({
-    user_image: { type: String },
+    user_image: { type: String, default: "" },
     fname: { type: String, required: true },
     lname: { type: String, required: true },
     email: { type: String, required: true },
-    gender: { type: String },
-    birthdate: { type: Date },
-    telno: { type: String },
+    gender: { type: String, default: "" },
+    birthdate: { type: Date, default: "" },
+    telno: { type: String, default: "" },
     role: { type: String, default: 'user' },
     pets: { type: Array, default: [] },
     firebase_uid: { type: String, required: true, unique: true },

@@ -10,10 +10,27 @@ module.exports = function (app) {
   };
 
   // Initialize our service with any options it requires
-  app.use('/pets', new Pets(options, app));
+  const petService = new Pets(options, app)
 
-  // Get our initialized service so that we can register hooks
-  const service = app.service('pets');
+  // Create Service and pass in our app and service name
+  app.use('/pets-service', petService)
+  app.service('pets-service').hooks(hooks)
 
-  service.hooks(hooks);
+  app.use('/pet', {
+    async get(id, params) {
+      return await petService.get(id, params)
+    },
+    async create(data, params) {
+      return await petService.createPet(data, params)
+    },
+    async patch(id, data, params) {
+      return await petService.patch(id, data, params)
+    }
+  })
+
+  app.use('/pet/:pet_id/qrcode', {
+    async find(params) {
+      return await petService.findPetFromQrcode(params)
+    }
+  })
 };
