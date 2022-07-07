@@ -118,4 +118,14 @@ exports.Users = class Users extends Service {
     return await this.app.service('pets-service').findPetByUserId(user_id)
   }
 
+  // Dev env only
+  async clearAllUser() {
+    let users = (await firebaseAdminAuth.listUsers()).users
+    let uid = users.map(user => {
+      return user.uid
+    })
+    let result = await firebaseAdminAuth.deleteUsers(uid)
+    return result
+  }
+
 };
