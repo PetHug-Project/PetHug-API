@@ -38,17 +38,14 @@ exports.Users = class Users extends Service {
 
   async registerUser(data, params) {
     let { email, password } = data
-    let user = await firebaseAdminAuth.createUser({
+    let user
+    user = await firebaseAdminAuth.createUser({
       email: email,
       password: password,
       emailVerified: true,
     })
-    try {
-      let { uid, providerData } = user
-      await super.create({ ...data, firebase_uid: uid, sign_in_provider: providerData[0].providerId })
-    } catch (error) {
-      throw error
-    }
+    let { uid, providerData } = user
+    await super.create({ ...data, firebase_uid: uid, sign_in_provider: providerData[0].providerId })
     return await this.loginUser(data)
   }
 
