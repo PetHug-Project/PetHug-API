@@ -8,9 +8,9 @@ process.on('unhandledRejection', (reason, p) =>
   logger.error('Unhandled Rejection at: Promise ', p, reason)
 )
 
-if (process.env.NODE_ENV == "develop") {
+if (process.env.NODE_ENV == "develop" || process.env.NODE_ENV == "production") {
   server.on('listening', () =>
-    logger.info('Feathers application started on http://%s', app.get('webhost'))
+    logger.info('Feathers application started on ', app.get('webhost'))
   )
 } else {
   server.on('listening', () =>
