@@ -1,14 +1,13 @@
-const { disallow } = require("feathers-hooks-common")
-const firebaseAuth = require("../../hooks/firebase-auth-hook")
+const firebaseAuthHook = require("../../hooks/firebase-auth-hook");
 
 module.exports = {
   before: {
     all: [],
     find: [],
-    get: [firebaseAuth()],
+    get: [firebaseAuthHook()],
     create: [],
-    update: [firebaseAuth()],
-    patch: [firebaseAuth()],
+    update: [firebaseAuthHook()],
+    patch: [firebaseAuthHook()],
     remove: []
   },
 

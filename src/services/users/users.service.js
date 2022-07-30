@@ -2,7 +2,7 @@
 const { Users } = require('./users.class');
 const createModel = require('../../models/users.model');
 const hooks = require('./users.hooks');
-const firebaseAuth = require("../../hooks/firebase-auth-hook");
+const firebaseAuthHook = require('../../hooks/firebase-auth-hook');
 
 module.exports = function (app) {
   const options = {
@@ -52,7 +52,7 @@ module.exports = function (app) {
   })
   app.service('/user/:user_id/pets').hooks({
     before: {
-      all: [firebaseAuth()],
+      all: [firebaseAuthHook()],
     }
   })
 };
