@@ -2,6 +2,7 @@
 const { Boards } = require('./boards.class');
 const createModel = require('../../models/boards.model');
 const hooks = require('./boards.hooks');
+const firebaseAuthHook = require('../../hooks/firebase-auth-hook');
 
 module.exports = function (app) {
   const options = {
@@ -26,4 +27,19 @@ module.exports = function (app) {
     }
   })
   app.service('boards').hooks(hooks);
+
+  app.use('/like-board', {
+    async get(id, params) {
+      return await boardService.likeBoard(id, params);
+    },
+    async remove(id, params) {
+      return await boardService.unLikeBoard(id, params);
+    }
+  })
+  app.service('like-board').hooks({
+    before: {
+      get: [firebaseAuthHook()],
+      remove: [firebaseAuthHook()]
+    }
+  });
 };

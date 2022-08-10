@@ -17,6 +17,18 @@ exports.Boards = class Boards extends Service {
     let { skip = 0, limit = 10 } = params.query
     skip = Number(skip)
     limit = Number(limit)
+    let boardProjection = {
+      _id: 1,
+      board_name: 1,
+      board_content: 1,
+      board_comment: 1,
+      liked: { $size: "$board_liked" },
+      createdAt: 1,
+      updatedAt: 1
+    }
+    if (params.headers.user_id) {
+      boardProjection["isLiked"] = { $in: [params.headers.user_id, "$board_liked"] }
+    }
     let result = await super.Model.aggregate([
       {
         $facet: {
@@ -25,15 +37,7 @@ exports.Boards = class Boards extends Service {
             { $skip: skip },
             { $limit: limit },
             {
-              $project: {
-                _id: 1,
-                board_name: 1,
-                board_content: 1,
-                board_comment: 1,
-                liked: { $size: "$board_liked" },
-                createdAt: 1,
-                updatedAt: 1
-              }
+              $project: boardProjection
             }
           ],
           pageInfo: [
@@ -63,6 +67,12 @@ exports.Boards = class Boards extends Service {
   async likeBoard(id, params) {
     let { user_id } = params.decodeAccessToken
     let result = await super.Model.updateOne({ _id: ObjectId(id) }, { $addToSet: { board_liked: user_id } })
+    return result
+  }
+
+  async unLikeBoard(id, params) {
+    let { user_id } = params.decodeAccessToken
+    let result = await super.Model.updateOne({ _id: ObjectId(id) }, { $pull: { board_liked: user_id } })
     return result
   }
 };

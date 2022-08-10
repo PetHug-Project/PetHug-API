@@ -2,7 +2,7 @@
 const { PetHistory } = require('./pet_history.class');
 const createModel = require('../../models/pet_history.model');
 const hooks = require('./pet_history.hooks');
-const firebaseAuth = require('../../hooks/firebase-auth-hook');
+const firebaseAuthHook = require('../../hooks/firebase-auth-hook');
 
 module.exports = function (app) {
   const options = {
@@ -31,7 +31,7 @@ module.exports = function (app) {
   })
   app.service('/pet-history').hooks({
     before: {
-      all: [firebaseAuth()],
+      all: [firebaseAuthHook()],
     }
   })
 

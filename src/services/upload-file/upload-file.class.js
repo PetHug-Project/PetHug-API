@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { firebaseAdmin } = require("../../utils/firebaseInit")
 const sharp = require("sharp")
+// console.log(firebaseAdmin.storage().bucket("pethug-project-1.appspot.com"));
 
 exports.UploadFile = class UploadFile {
   constructor(options, app) {
@@ -31,7 +32,7 @@ exports.UploadFile = class UploadFile {
   }
 
   async resizeAndUpload(file) {
-    const bucket = firebaseAdmin.storage().bucket()
+    const bucket = firebaseAdmin.storage().bucket(this.app.get("storage_bucket"))
     const fileName = `${Date.now()}_${file.originalname.replace(/\s/g, "_")}`
     const resizeImageFunction = async (buffer) => {
       let imageAfterResize = await sharp(buffer).resize({ width: 2048 }).jpeg({ quality: 80 }).toBuffer()
