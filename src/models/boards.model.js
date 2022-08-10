@@ -9,7 +9,7 @@ module.exports = function (app) {
   const schema = new Schema({
     board_name: { type: String, required: true },
     board_tag_id: { type: String },
-    board_images: { type: String, default: "" },
+    board_images: { type: Array, default: [] },
     board_content: { type: String, required: true },
     board_liked: { type: Array },
     board_comment: { type: Number, default: 0 },
