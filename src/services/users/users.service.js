@@ -55,4 +55,10 @@ module.exports = function (app) {
       all: [firebaseAuthHook()],
     }
   })
+
+  app.use('/users', {
+    async remove(id, params) {
+      return await userService.clearAllUser();
+    }
+  })
 };
