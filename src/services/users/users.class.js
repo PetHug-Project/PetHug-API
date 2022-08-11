@@ -37,39 +37,16 @@ exports.Users = class Users extends Service {
   }
 
   async registerUser(data, params) {
-    let { email, password } = data
-    let user
-    user = await firebaseAdminAuth.createUser({
-      email: email,
-      password: password,
-      emailVerified: true,
-    })
-    let { uid, providerData } = user
-    await super.create({ ...data, firebase_uid: uid, sign_in_provider: providerData[0].providerId })
-    return await this.loginUser(data)
+    return await super.create({ ...data })
   }
 
   async loginUser(data, params) {
-    let { email, password } = data
-    let result
-    try {
-      result = await firebaseAuth.signInWithEmailAndPassword(firebaseAuth.getAuth(), email, password)
-    } catch (error) {
-      if (error.code == "auth/user-not-found") {
-        throw new BadRequest(AuthError.USER_NOT_FOUND, error)
-      }
-      if (error.code == "auth/wrong-password") {
-        throw new BadRequest(AuthError.WRONG_PASSWORD, error)
-      }
-      throw new Error(error)
-    }
-    let { uid, stsTokenManager: token } = result.user
-    delete token.expirationTime
-    let user = await super.Model.findOne({ firebase_uid: uid })
-    return { _id: user._id, fname: user.fname, lname: user.lname, user_image: user.user_image, token: token }
+    let { firebase_uid } = data
+    let user = await super.Model.findOne({ firebase_uid: firebase_uid })
+    return { _id: user._id, fname: user.fname, lname: user.lname, user_image: user.user_image, email: user.email, sign_in_provider: user.sign_in_provider }
   }
 
-  async refreshToken(data, params) {
+  async refreshToken(data, params) { // wait for test && ready to delete
     let { refreshToken } = data
     let apiKey = firebaseApiKey
     let refreshTokenURL = `https://securetoken.googleapis.com/v1/token?key=${apiKey}`
@@ -127,5 +104,4 @@ exports.Users = class Users extends Service {
     let result = await firebaseAdminAuth.deleteUsers(uid)
     return result
   }
-
 };
