@@ -18,6 +18,9 @@ module.exports = function (app) {
     pets: { type: Array, default: [] },
     firebase_uid: { type: String, required: true, unique: true },
     sign_in_provider: { type: String, required: true }
+  }, {
+    timestamps: true,
+    collection: 'users'
   });
 
   // This is necessary to avoid model compilation errors in watch mode
