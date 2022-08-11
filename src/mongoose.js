@@ -5,11 +5,10 @@ module.exports = function (app) {
   console.log("Connecting to Database ...");
   mongoose.connect(
     app.get('mongodb')
-  ).then( () => {
+  ).then(() => {
     console.log("Connected to Database Successfully");
-    }
-  )
-  .catch(err => {
+  }
+  ).catch(err => {
     logger.error(err);
     process.exit(1);
   });

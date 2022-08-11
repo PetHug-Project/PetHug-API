@@ -4,10 +4,10 @@ module.exports = {
   before: {
     all: [],
     find: [],
-    get: [firebaseAuthHook()],
-    create: [],
-    update: [firebaseAuthHook()],
-    patch: [firebaseAuthHook()],
+    get: [],
+    create: [firebaseAuthHook()],
+    update: [],
+    patch: [],
     remove: []
   },
 
