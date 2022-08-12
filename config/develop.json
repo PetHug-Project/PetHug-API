@@ -2,6 +2,6 @@
   "host": "HOST",
   "port": "PORT",
   "mongodb": "MONGO_URL",
-  "web_host": "https://dev.pethug-project.com/api/v1",
+  "web_host": "https://dev.pethug-project.com",
   "storage_bucket": "STORAGE_BUCKET"
 }
