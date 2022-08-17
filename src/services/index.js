@@ -5,6 +5,7 @@ const petHistory = require('./pet_history/pet_history.service.js');
 const boards = require('./boards/boards.service.js');
 const boardComment = require('./board_comment/board_comment.service.js');
 const boardCommentReply = require('./board_comment_reply/board_comment_reply.service.js');
+const verifyLine = require('./verify-line/verify-line.service.js');
 // eslint-disable-next-line no-unused-vars
 module.exports = function (app) {
   app.configure(users);
@@ -14,4 +15,5 @@ module.exports = function (app) {
   app.configure(boards);
   app.configure(boardComment);
   app.configure(boardCommentReply);
+  app.configure(verifyLine);
 }
