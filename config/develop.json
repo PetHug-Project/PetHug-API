@@ -3,5 +3,8 @@
   "port": "PORT",
   "mongodb": "MONGO_URL",
   "web_host": "https://dev.pethug-project.com",
-  "storage_bucket": "STORAGE_BUCKET"
+  "storage_bucket": "STORAGE_BUCKET",
+  "line_channel_id": "",
+  "line_channel_secret": "",
+  "line_channel_access_token": ""
 }

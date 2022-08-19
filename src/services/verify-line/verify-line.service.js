@@ -12,6 +12,9 @@ module.exports = function (app) {
   app.use('/verify-line', {
     async create(data, params) {
       return await verifyLineService.verify(data, params);
+    },
+    async update(id, data, params) {
+      return await verifyLineService.updateRichMenu(id, data, params);
     }
   });
 

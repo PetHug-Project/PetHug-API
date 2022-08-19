@@ -1,3 +1,5 @@
+const { default: axios } = require("axios");
+
 /* eslint-disable no-unused-vars */
 exports.VerifyLine = class VerifyLine {
   constructor(options, app) {
@@ -12,33 +14,16 @@ exports.VerifyLine = class VerifyLine {
     return { _id: user._id, fname: user.fname, lname: user.lname, user_image: user.user_image, email: user.email, sign_in_provider: user.sign_in_provider }
   }
 
-  async find(params) {
-    return [];
+  async updateRichMenu(id, data, params) {
+    let { richMenuId, line_uid } = data
+    await axios.post(`https://api.line.me/v2/bot/user/${line_uid}/richmenu/${richMenuId}`, {
+    }, {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + this.app.get('line_channel_access_token')
+      }
+    })
+    return { result: "SUCCESS" }
   }
 
-  async get(id, params) {
-    return {
-      id, text: `A new message with ID: ${id}!`
-    };
-  }
-
-  async create(data, params) {
-    if (Array.isArray(data)) {
-      return Promise.all(data.map(current => this.create(current, params)));
-    }
-
-    return data;
-  }
-
-  async update(id, data, params) {
-    return data;
-  }
-
-  async patch(id, data, params) {
-    return data;
-  }
-
-  async remove(id, params) {
-    return { id };
-  }
 };
