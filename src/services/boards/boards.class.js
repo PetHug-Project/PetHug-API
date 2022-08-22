@@ -8,8 +8,9 @@ exports.Boards = class Boards extends Service {
   }
 
   async createBoard(data, params) {
-    let { user_id } = params.decodeAccessToken
-    data.user_id = user_id
+    let { uid } = params.decodeAccessToken
+    let user = await this.app.service("users-service").getDataFromFirebaseUid(uid)
+    data.user_id = user._id
     return await super.create(data, params)
   }
 
