@@ -3,6 +3,7 @@ const { default: axios } = require('axios');
 const { Service } = require('feathers-mongoose');
 const { AuthError } = require('../../constants/AuthError');
 const { firebaseAdmin, firebaseAuth, firebaseApiKey } = require("../../utils/firebaseInit")
+const { ObjectId } = require("mongoose").Types
 
 const firebaseAdminAuth = firebaseAdmin.auth()
 exports.Users = class Users extends Service {
@@ -93,6 +94,22 @@ exports.Users = class Users extends Service {
       throw new Forbidden("Can't view this user")
     }
     return await this.app.service('pets-service').findPetByUserId(user_id)
+  }
+
+  async getDataPublic(id, params) {
+    let result = await super.Model.find({ _id: ObjectId(id) }, { _id: 1, fname: 1, lname: 1, user_image: 1 })
+    if (result.length <= 0) {
+      throw new NotFound("User not found")
+    }
+    return result[0]
+  }
+
+  async getDataFromFirebaseUid(firebaseUid) {
+    let result = await super.Model.find({ firebase_uid: firebaseUid }, { _id: 1, email: 1, fname: 1, lname: 1, user_image: 1 })
+    if (result.length <= 0) {
+      throw new NotFound("User not found")
+    }
+    return result[0]
   }
 
   // Dev env only

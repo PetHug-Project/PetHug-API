@@ -62,6 +62,12 @@ module.exports = function (app) {
     }
   })
 
+  app.use('/user/data-public', {
+    async get(id, params) {
+      return await userService.getDataPublic(id, params)
+    }
+  })
+
   app.use('/auth/dev/users/login', {
     async create(data, params) {
       return await userService.loginWithEmail(data, params)
