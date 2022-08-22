@@ -22,6 +22,7 @@ exports.Boards = class Boards extends Service {
       board_name: 1,
       board_content: 1,
       board_comment: 1,
+      board_images: 1,
       liked: { $size: "$board_liked" },
       createdAt: 1,
       updatedAt: 1
