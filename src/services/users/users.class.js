@@ -104,4 +104,13 @@ exports.Users = class Users extends Service {
     let result = await firebaseAdminAuth.deleteUsers(uid)
     return result
   }
+
+  async loginWithEmail(data, params) {
+    let { email, password } = data
+    let result = await firebaseAuth.signInWithEmailAndPassword(firebaseAuth.getAuth(), email, password)
+    let { user: userFirebase } = result
+    let accessToken = userFirebase.toJSON().stsTokenManager.accessToken
+    let user = await this.loginUser({ firebase_uid: userFirebase.uid }, params)
+    return { user, accessToken }
+  }
 };

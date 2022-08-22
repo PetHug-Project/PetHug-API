@@ -61,4 +61,10 @@ module.exports = function (app) {
       return await userService.clearAllUser();
     }
   })
+
+  app.use('/auth/dev/users/login', {
+    async create(data, params) {
+      return await userService.loginWithEmail(data, params)
+    }
+  })
 };
