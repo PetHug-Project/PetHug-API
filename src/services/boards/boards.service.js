@@ -42,4 +42,10 @@ module.exports = function (app) {
       remove: [firebaseAuthHook()]
     }
   });
+
+  app.use('/board-random', {
+    async find(params) {
+      return await boardService.randomBoard(params);
+    }
+  })
 };

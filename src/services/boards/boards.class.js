@@ -77,4 +77,33 @@ exports.Boards = class Boards extends Service {
     let result = await super.Model.updateOne({ _id: ObjectId(id) }, { $pull: { board_liked: user_id } })
     return result
   }
+
+  async randomBoard(params) {
+    let result = await super.Model.aggregate([
+      {
+        $facet: {
+          data: [
+            { $sample: { size: 5 } },
+            {
+              $project: {
+                _id: 1,
+                board_name: 1,
+                board_liked: 1,
+                board_comment: 1,
+                board_images: 1,
+                createdAt: 1,
+              }
+            }
+          ],
+        },
+      },
+      {
+        $project: {
+          data: 1,
+        }
+      }
+    ])
+    result = result[0]
+    return result
+  }
 };
