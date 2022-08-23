@@ -78,22 +78,79 @@ exports.Boards = class Boards extends Service {
     return result
   }
 
-  async randomBoard(params) {
+  async randomBoard(id = null, params) {
+    let { size = 3 } = params.query
     let result = await super.Model.aggregate([
       {
         $facet: {
           data: [
-            { $sample: { size: 5 } },
+            {
+              $match: {
+                _id: { $ne: ObjectId(id) }
+              },
+            },
+            { $sample: { size: size } },
+            {
+              $addFields: {
+                likedCount: {
+                  $size: "$board_liked"
+                }
+              }
+            },
             {
               $project: {
                 _id: 1,
                 board_name: 1,
-                board_liked: 1,
+                likedCount: 1,
                 board_comment: 1,
                 board_images: 1,
                 createdAt: 1,
               }
             }
+          ],
+        },
+      },
+      {
+        $project: {
+          data: 1,
+        }
+      }
+    ])
+    result = result[0]
+    return result
+  }
+
+  async findBoardSortByLike(params) {
+    let { size = 3 } = params.query
+    let result = await super.Model.aggregate([
+      {
+        $facet: {
+          data: [
+            {
+              $addFields: {
+                likedCount: {
+                  $size: "$board_liked"
+                }
+              }
+            },
+            {
+              $sort: {
+                likedCount: -1,
+                board_comment: -1,
+                createdAt: -1
+              }
+            },
+            {
+              $project: {
+                _id: 1,
+                board_name: 1,
+                likedCount: 1,
+                board_comment: 1,
+                board_images: 1,
+                createdAt: 1,
+              }
+            },
+            { $limit: size }
           ],
         },
       },

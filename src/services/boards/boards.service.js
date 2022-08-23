@@ -44,8 +44,17 @@ module.exports = function (app) {
   });
 
   app.use('/board-random', {
+    async get(id, params) {
+      return await boardService.randomBoard(id, params);
+    },
     async find(params) {
-      return await boardService.randomBoard(params);
+      return await boardService.randomBoard(null, params);
+    }
+  })
+
+  app.use('/most-like-board', {
+    async find(params) {
+      return await boardService.findBoardSortByLike(params);
     }
   })
 };
