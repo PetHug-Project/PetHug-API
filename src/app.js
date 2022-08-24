@@ -36,7 +36,10 @@ app.use(cors({
 }))
 
 // include before other routes
-app.options('*', cors())
+app.options('*', cors({
+  allowedHeaders: "*",
+  methods: "*",
+}))
 
 app.use(compress())
 app.use(express.json())
