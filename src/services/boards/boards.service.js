@@ -23,7 +23,7 @@ module.exports = function (app) {
       return await boardService.createBoard(data, params);
     },
     async get(id, params) {
-      return await boardService.get(id, params);
+      return await boardService.getBoardById(id, params);
     }
   })
   app.service('boards').hooks(hooks);

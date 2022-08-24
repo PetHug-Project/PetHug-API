@@ -67,13 +67,17 @@ exports.Boards = class Boards extends Service {
   }
 
   async likeBoard(id, params) {
-    let { user_id } = params.decodeAccessToken
+    let { uid } = params.decodeAccessToken
+    let user = await this.app.service("users-service").getDataFromFirebaseUid(uid)
+    let user_id = user._id.toString()
     let result = await super.Model.updateOne({ _id: ObjectId(id) }, { $addToSet: { board_liked: user_id } })
     return result
   }
 
   async unLikeBoard(id, params) {
-    let { user_id } = params.decodeAccessToken
+    let { uid } = params.decodeAccessToken
+    let user = await this.app.service("users-service").getDataFromFirebaseUid(uid)
+    let user_id = user._id.toString()
     let result = await super.Model.updateOne({ _id: ObjectId(id) }, { $pull: { board_liked: user_id } })
     return result
   }
@@ -157,6 +161,38 @@ exports.Boards = class Boards extends Service {
       {
         $project: {
           data: 1,
+        }
+      }
+    ])
+    result = result[0]
+    return result
+  }
+
+  async getBoardById(id, params) {
+    let { user_id = null } = params.headers
+    let result = await super.Model.aggregate([
+      {
+        $match: {
+          _id: ObjectId(id)
+        }
+      },
+      {
+        $addFields: {
+          isLiked: {
+            $in: [user_id, "$board_liked"]
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          board_name: 1,
+          board_content: 1,
+          board_comment: 1,
+          board_images: 1,
+          isLiked: 1,
+          createdAt: 1,
+          updatedAt: 1
         }
       }
     ])
