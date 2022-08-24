@@ -180,6 +180,9 @@ exports.Boards = class Boards extends Service {
         $addFields: {
           isLiked: {
             $in: [user_id, "$board_liked"]
+          },
+          likedCount: {
+            $size: "$board_liked"
           }
         }
       },
@@ -191,6 +194,7 @@ exports.Boards = class Boards extends Service {
           board_comment: 1,
           board_images: 1,
           isLiked: 1,
+          likedCount: 1,
           createdAt: 1,
           updatedAt: 1
         }
