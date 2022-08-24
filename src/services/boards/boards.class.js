@@ -196,7 +196,8 @@ exports.Boards = class Boards extends Service {
           isLiked: 1,
           likedCount: 1,
           createdAt: 1,
-          updatedAt: 1
+          updatedAt: 1,
+          user_id: 1
         }
       }
     ])
