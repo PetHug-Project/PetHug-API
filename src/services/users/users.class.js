@@ -38,6 +38,10 @@ exports.Users = class Users extends Service {
   }
 
   async registerUser(data, params) {
+    const defaultUserImage = "https://cdn-icons-png.flaticon.com/512/634/634741.png"
+    if (!data.user_image) {
+      data.user_image = defaultUserImage
+    }
     return await super.create({ ...data })
   }
 

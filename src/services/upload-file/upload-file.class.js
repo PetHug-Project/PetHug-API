@@ -16,7 +16,7 @@ exports.UploadFile = class UploadFile {
     const { files } = params
     const file = files[0]
     const fileName = await this.resizeAndUpload(file)
-    return { image_name: fileName }
+    return { image_path: `https://firebasestorage.googleapis.com/v0/b/${this.app.get('storage_bucket')}/o/${fileName}?alt=media` }
   }
 
   async handleUploadFile(params) {
