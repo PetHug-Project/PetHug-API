@@ -15,8 +15,7 @@ exports.UploadFile = class UploadFile {
   async handleSingleImage(params) {
     const { files } = params
     const file = files[0]
-    const fileName = await this.resizeAndUpload(file)
-    return { image_path: `https://firebasestorage.googleapis.com/v0/b/${this.app.get('storage_bucket')}/o/${fileName}?alt=media` }
+    return await this.resizeAndUpload(file)
   }
 
   async handleUploadFile(params) {
@@ -53,7 +52,7 @@ exports.UploadFile = class UploadFile {
       return { error: fileName }
     }
 
-    return fileName
+    return { image_path: `https://firebasestorage.googleapis.com/v0/b/${this.app.get('storage_bucket')}/o/${fileName}?alt=media` }
   }
 
 }
