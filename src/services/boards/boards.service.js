@@ -57,4 +57,10 @@ module.exports = function (app) {
       return await boardService.findBoardSortByLike(params);
     }
   })
+
+  app.use('/get-board-by-user', {
+    async get(id, params) {
+      return await boardService.getBoardByUserId(id, params);
+    }
+  })
 };

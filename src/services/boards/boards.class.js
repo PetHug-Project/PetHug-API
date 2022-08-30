@@ -204,4 +204,56 @@ exports.Boards = class Boards extends Service {
     result = result[0]
     return result
   }
+
+  async getBoardByUserId(user_id, params) {
+    let { skip = 0, limit = 10 } = params.query
+    skip = Number(skip)
+    limit = Number(limit)
+    let boardProjection = {
+      _id: 1,
+      board_name: 1,
+      board_comment: 1,
+      board_images: 1,
+      liked: { $size: "$board_liked" },
+      createdAt: 1,
+      updatedAt: 1
+    }
+    if (user_id) {
+      boardProjection["isLiked"] = { $in: [user_id, "$board_liked"] }
+    }
+    let result = await super.Model.aggregate([
+      {
+        $facet: {
+          data: [
+            { $sort: { createdAt: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+            {
+              $match: {
+                user_id: user_id
+              }
+            },
+            {
+              $project: boardProjection
+            }
+          ],
+          pageInfo: [
+            { $group: { _id: null, count: { $sum: 1 } } },
+          ],
+        },
+      },
+      {
+        $project: {
+          data: 1,
+          total: { $arrayElemAt: ["$pageInfo.count", 0] },
+        }
+      }
+    ])
+    result = result[0]
+    result.skip = skip
+    result.limit = limit
+    result.totalPage = Math.ceil(result.total / limit)
+    result.currentPage = Math.ceil(skip / limit) + 1
+    return result
+  }
 };
