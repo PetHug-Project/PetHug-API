@@ -63,4 +63,10 @@ module.exports = function (app) {
       return await boardService.getBoardByUserId(id, params);
     }
   })
+
+  app.use('/find-board-by-search', {
+    async find(params) {
+      return await boardService.findBoardBySearchBar(params);
+    }
+  })
 };
