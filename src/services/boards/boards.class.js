@@ -126,6 +126,7 @@ exports.Boards = class Boards extends Service {
 
   async findBoardSortByLike(params) {
     let { size = 3 } = params.query
+    let { user_id = null } = params.headers
     let result = await super.Model.aggregate([
       {
         $facet: {
@@ -152,6 +153,9 @@ exports.Boards = class Boards extends Service {
                 board_comment: 1,
                 board_images: 1,
                 createdAt: 1,
+                isLiked: {
+                  $in: [user_id, "$board_liked"]
+                }
               }
             },
             { $limit: size }
