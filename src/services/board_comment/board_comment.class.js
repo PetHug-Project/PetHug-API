@@ -102,4 +102,8 @@ exports.BoardComment = class BoardComment extends Service {
     result.currentPage = Math.ceil(skip / limit) + 1
     return result
   }
+
+  getModel() {
+    return super.Model
+  }
 };

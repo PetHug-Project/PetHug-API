@@ -69,4 +69,15 @@ module.exports = function (app) {
       return await boardService.findBoardBySearchBar(params);
     }
   })
+
+  app.use('/delete-board', {
+    async remove(id, params) {
+      return await boardService.deleteOwnBoardByBoardId(id, params);
+    }
+  }).hooks({
+    before: {
+      remove: [firebaseAuthHook()]
+    }
+  })
+
 };

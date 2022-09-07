@@ -14,4 +14,8 @@ exports.BoardCommentReply = class BoardCommentReply extends Service {
     this.app.service("board-service").addComment(data.board_id, result._id.toString())
     return result
   }
+
+  getModel() {
+    return super.Model
+  }
 };

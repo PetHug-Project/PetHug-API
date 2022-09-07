@@ -318,4 +318,33 @@ exports.Boards = class Boards extends Service {
     result.currentPage = Math.ceil(skip / limit) + 1
     return result
   }
+
+  async deleteOwnBoardByBoardId(id, params) {
+    let { uid } = params.decodeAccessToken
+    let user = await this.app.service("users-service").getDataFromFirebaseUid(uid)
+    let user_id = user._id.toString()
+
+    let commentService = this.app.service("board-comment-service")
+    let replyCommentService = this.app.service("board-comment-reply-service")
+
+    let commentModel = commentService.getModel()
+    let replyCommentModel = replyCommentService.getModel()
+    let result = await super.Model.deleteOne({
+      _id: ObjectId(id),
+      user_id
+    })
+
+    if (result.deletedCount >= 1) {
+      await commentModel.deleteMany({
+        board_id: id
+      })
+      await replyCommentModel.deleteMany({
+        board_id: id
+      })
+
+      return { msg: "Delete Board Successfully" }
+    }
+
+    throw new Error("Delete Board Failed")
+  }
 };
