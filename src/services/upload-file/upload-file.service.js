@@ -37,4 +37,21 @@ module.exports = function (app) {
       return await uploadFile.handleSingleImage(params)
     }
   })
+
+  app.use('/upload-images', multer.fields([
+    {
+      name: 'img',
+      maxCount: 3
+    }
+  ]), async (req, res, next) => {
+    if (!req.files || !req.files.img) {
+      return res.status(500).send({ error: "Please send image to upload" })
+    }
+    req.feathers.files = req.files.img
+    next()
+  }, {
+    async create(data, params) {
+      return await uploadFile.handleUploadFile(params)
+    }
+  })
 };

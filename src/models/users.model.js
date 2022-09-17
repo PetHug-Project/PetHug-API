@@ -17,7 +17,11 @@ module.exports = function (app) {
     role: { type: String, default: 'user' },
     pets: { type: Array, default: [] },
     firebase_uid: { type: String, required: true, unique: true },
-    sign_in_provider: { type: String, required: true }
+    sign_in_provider: { type: String, required: true },
+    line_uid: { type: String, default: "" },
+  }, {
+    timestamps: true,
+    collection: 'users'
   });
 
   // This is necessary to avoid model compilation errors in watch mode

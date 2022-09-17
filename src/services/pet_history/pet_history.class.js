@@ -8,7 +8,7 @@ exports.PetHistory = class PetHistory extends Service {
 
   async addPetHistory(data, params) {
     const { pet_id } = params.query
-    let result = await super.create({ pet_id, ...data })
+    let result = await super.create(data, params)
     const petModel = this.app.service('pets-service').getModel()
     await petModel.updateOne({ _id: pet_id }, { $push: { pet_history: result._id.toString() } })
     return result

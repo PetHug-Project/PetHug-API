@@ -23,7 +23,7 @@ module.exports = function (app) {
       return await boardService.createBoard(data, params);
     },
     async get(id, params) {
-      return await boardService.get(id, params);
+      return await boardService.getBoardById(id, params);
     }
   })
   app.service('boards').hooks(hooks);
@@ -42,4 +42,42 @@ module.exports = function (app) {
       remove: [firebaseAuthHook()]
     }
   });
+
+  app.use('/board-random', {
+    async get(id, params) {
+      return await boardService.randomBoard(id, params);
+    },
+    async find(params) {
+      return await boardService.randomBoard(null, params);
+    }
+  })
+
+  app.use('/most-like-board', {
+    async find(params) {
+      return await boardService.findBoardSortByLike(params);
+    }
+  })
+
+  app.use('/get-board-by-user', {
+    async get(id, params) {
+      return await boardService.getBoardByUserId(id, params);
+    }
+  })
+
+  app.use('/find-board-by-search', {
+    async find(params) {
+      return await boardService.findBoardBySearchBar(params);
+    }
+  })
+
+  app.use('/delete-board', {
+    async remove(id, params) {
+      return await boardService.deleteOwnBoardByBoardId(id, params);
+    }
+  }).hooks({
+    before: {
+      remove: [firebaseAuthHook()]
+    }
+  })
+
 };

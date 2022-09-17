@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { firebaseAdmin } = require("../../utils/firebaseInit")
 const sharp = require("sharp")
-// console.log(firebaseAdmin.storage().bucket("pethug-project-1.appspot.com"));
 
 exports.UploadFile = class UploadFile {
   constructor(options, app) {
@@ -16,19 +15,23 @@ exports.UploadFile = class UploadFile {
   async handleSingleImage(params) {
     const { files } = params
     const file = files[0]
-    const fileName = await this.resizeAndUpload(file)
-    return { image_name: fileName }
+    return await this.resizeAndUpload(file)
   }
 
-  async handleFile(params) {
+  async handleUploadFile(params) {
     const { files } = params
     const fileNameArr = []
+    let errorFileUploaded = []
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
-      const fileName = await this.resizeAndUpload(file)
-      fileNameArr.push(fileName)
+      const fileUploaded = await this.resizeAndUpload(file)
+      if (fileUploaded.error) {
+        errorFileUploaded.push(fileUploaded.error)
+        continue
+      }
+      fileNameArr.push(fileUploaded)
     }
-    return { images_name: fileNameArr }
+    return { images_name: fileNameArr, errorFiles: errorFileUploaded }
   }
 
   async resizeAndUpload(file) {
@@ -43,9 +46,13 @@ exports.UploadFile = class UploadFile {
     }
     const resizedImage = await resizeImageFunction(file.buffer)
 
-    await bucket.file(fileName).save(resizedImage)
+    try {
+      await bucket.file(fileName).save(resizedImage)
+    } catch (error) {
+      return { error: fileName }
+    }
 
-    return fileName
+    return { image_path: `https://firebasestorage.googleapis.com/v0/b/${this.app.get('storage_bucket')}/o/${fileName}?alt=media` }
   }
 
 }

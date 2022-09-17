@@ -84,9 +84,9 @@ exports.Pets = class Pets extends Service {
       buffer: buffer,
       originalname: `${(require("crypto").randomBytes(5)).toString('hex')}-${dayjs().unix()}.png`
     }
-    let petHistoryService = this.app.service("upload-service")
-    let result = await petHistoryService.resizeAndUpload(obj)
-    return result
+    let uploadService = this.app.service("upload-service")
+    let { image_path } = await uploadService.resizeAndUpload(obj)
+    return image_path
   }
 
 };

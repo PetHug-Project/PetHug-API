@@ -3,6 +3,7 @@ const { default: axios } = require('axios');
 const { Service } = require('feathers-mongoose');
 const { AuthError } = require('../../constants/AuthError');
 const { firebaseAdmin, firebaseAuth, firebaseApiKey } = require("../../utils/firebaseInit")
+const { ObjectId } = require("mongoose").Types
 
 const firebaseAdminAuth = firebaseAdmin.auth()
 exports.Users = class Users extends Service {
@@ -37,42 +38,20 @@ exports.Users = class Users extends Service {
   }
 
   async registerUser(data, params) {
-    let { email, password } = data
-    let user = await firebaseAdminAuth.createUser({
-      email: email,
-      password: password,
-      emailVerified: true,
-    })
-    try {
-      let { uid, providerData } = user
-      await super.create({ ...data, firebase_uid: uid, sign_in_provider: providerData[0].providerId })
-    } catch (error) {
-      throw error
+    const defaultUserImage = "https://cdn-icons-png.flaticon.com/512/634/634741.png"
+    if (!data.user_image) {
+      data.user_image = defaultUserImage
     }
-    return await this.loginUser(data)
+    return await super.create({ ...data })
   }
 
   async loginUser(data, params) {
-    let { email, password } = data
-    let result
-    try {
-      result = await firebaseAuth.signInWithEmailAndPassword(firebaseAuth.getAuth(), email, password)
-    } catch (error) {
-      if (error.code == "auth/user-not-found") {
-        throw new BadRequest(AuthError.USER_NOT_FOUND, error)
-      }
-      if (error.code == "auth/wrong-password") {
-        throw new BadRequest(AuthError.WRONG_PASSWORD, error)
-      }
-      throw new Error(error)
-    }
-    let { uid, stsTokenManager: token } = result.user
-    delete token.expirationTime
-    let user = await super.Model.findOne({ firebase_uid: uid })
-    return { _id: user._id, fname: user.fname, lname: user.lname, user_image: user.user_image, token: token }
+    let { firebase_uid } = data
+    let user = await super.Model.findOne({ firebase_uid: firebase_uid })
+    return { _id: user._id, fname: user.fname, lname: user.lname, user_image: user.user_image, email: user.email, sign_in_provider: user.sign_in_provider }
   }
 
-  async refreshToken(data, params) {
+  async refreshToken(data, params) { // wait for test && ready to delete
     let { refreshToken } = data
     let apiKey = firebaseApiKey
     let refreshTokenURL = `https://securetoken.googleapis.com/v1/token?key=${apiKey}`
@@ -121,4 +100,38 @@ exports.Users = class Users extends Service {
     return await this.app.service('pets-service').findPetByUserId(user_id)
   }
 
+  async getDataPublic(id, params) {
+    let result = await super.Model.find({ _id: ObjectId(id) }, { _id: 1, fname: 1, lname: 1, user_image: 1 })
+    if (result.length <= 0) {
+      throw new NotFound("User not found")
+    }
+    return result[0]
+  }
+
+  async getDataFromFirebaseUid(firebaseUid) {
+    let result = await super.Model.find({ firebase_uid: firebaseUid }, { _id: 1, email: 1, fname: 1, lname: 1, user_image: 1 })
+    if (result.length <= 0) {
+      throw new NotFound("User not found")
+    }
+    return result[0]
+  }
+
+  // Dev env only
+  async clearAllUser() {
+    let users = (await firebaseAdminAuth.listUsers()).users
+    let uid = users.map(user => {
+      return user.uid
+    })
+    let result = await firebaseAdminAuth.deleteUsers(uid)
+    return result
+  }
+
+  async loginWithEmail(data, params) {
+    let { email, password } = data
+    let result = await firebaseAuth.signInWithEmailAndPassword(firebaseAuth.getAuth(), email, password)
+    let { user: userFirebase } = result
+    let accessToken = userFirebase.toJSON().stsTokenManager.accessToken
+    let user = await this.loginUser({ firebase_uid: userFirebase.uid }, params)
+    return { user, accessToken }
+  }
 };

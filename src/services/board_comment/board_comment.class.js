@@ -7,8 +7,9 @@ exports.BoardComment = class BoardComment extends Service {
   }
 
   async createBoardComment(data, params) {
-    let { user_id } = params.decodeAccessToken
-    data.user_id = user_id
+    let { uid } = params.decodeAccessToken
+    let user = await this.app.service("users-service").getDataFromFirebaseUid(uid)
+    data.user_id = user._id
     let result = await super.create(data, params)
     this.app.service("board-service").addComment(data.board_id, result._id.toString())
     return result
@@ -19,53 +20,68 @@ exports.BoardComment = class BoardComment extends Service {
     skip = Number(skip)
     limit = Number(limit)
     let result = await super.Model.aggregate([
-      { $match: { board_id: id } },
       {
         $facet: {
           data: [
             { $sort: { createdAt: -1 } },
-            { $skip: skip },
-            { $limit: limit },
+            { $skip: 0 },
+            { $limit: 10 },
+            { $match: { board_id: id } },
             {
               $lookup: {
-                from: "board_comment_replies",
+                from: "board_comments",
                 let: { "stated_comment_id": "$_id" },
                 pipeline: [
                   {
+                    $addFields: {
+                      commentId: {
+                        $toString: "$_id"
+                      }
+                    }
+                  },
+                  {
                     $match: {
                       $expr: {
-                        $eq: ["$board_comment_id", {
+                        $eq: ["$commentId", {
                           $toString: "$$stated_comment_id"
                         }]
                       }
                     }
                   },
                   {
-                    $limit: 3
-                  },
-                  {
-                    $project: {
-                      comment_reply_id: "$_id",
-                      board_comment_id: 1,
-                      user_id: 1,
-                      reply_comment_detail: 1,
-                      createdAt: 1
+                    $lookup: {
+                      from: "board_comment_replies",
+                      let: { "reply_comment_id": "$$stated_comment_id" },
+                      pipeline: [
+                        {
+                          $sort: {
+                            createdAt: -1
+                          }
+                        },
+                        {
+                          $match: {
+                            $expr: {
+                              $eq: ["$board_comment_id", {
+                                $toString: "$$stated_comment_id"
+                              }]
+                            }
+                          }
+                        },
+                      ],
+                      as: "reply"
                     }
                   }
                 ],
-                as: "reply"
+                as: "comments"
               }
             },
             {
               $project: {
-                _id: 1,
-                board_id: 1,
-                user_id: 1,
-                comment_detail: 1,
-                createdAt: 1,
-                reply: 1
+                comments: {
+                  $arrayElemAt: ["$comments", 0]
+                }
               }
-            }
+            },
           ],
           pageInfo: [
             { $group: { _id: null, count: { $sum: 1 } } },
@@ -75,7 +91,7 @@ exports.BoardComment = class BoardComment extends Service {
       {
         $project: {
           total: { $arrayElemAt: ["$pageInfo.count", 0] },
-          data: 1,
+          data: "$data.comments",
         }
       }
     ])
@@ -85,5 +101,9 @@ exports.BoardComment = class BoardComment extends Service {
     result.totalPage = Math.ceil(result.total / limit)
     result.currentPage = Math.ceil(skip / limit) + 1
     return result
+  }
+
+  getModel() {
+    return super.Model
   }
 };
