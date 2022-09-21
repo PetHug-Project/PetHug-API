@@ -24,8 +24,8 @@ exports.BoardComment = class BoardComment extends Service {
         $facet: {
           data: [
             { $sort: { createdAt: -1 } },
-            { $skip: 0 },
-            { $limit: 10 },
+            { $skip: skip },
+            { $limit: limit },
             { $match: { board_id: id } },
             {
               $lookup: {
@@ -84,6 +84,7 @@ exports.BoardComment = class BoardComment extends Service {
             },
           ],
           pageInfo: [
+            { $match: { board_id: id } },
             { $group: { _id: null, count: { $sum: 1 } } },
           ],
         },
