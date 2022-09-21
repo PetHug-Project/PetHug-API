@@ -10,10 +10,20 @@ module.exports = function (app) {
   };
 
   // Initialize our service with any options it requires
-  app.use('/board-tag', new BoardTag(options, app));
+  const boardTagService = new BoardTag(options, app);
+  app.use('/board-tag-service', boardTagService);
+
+  app.use('/board-tag', {
+    async find(params) {
+      return await boardTagService.find(params);
+    },
+    async create(data, params) {
+      return await boardTagService.create(data, params);
+    }
+  })
 
   // Get our initialized service so that we can register hooks
-  const service = app.service('board-tag');
+  const service = app.service('board-tag-service');
 
   service.hooks(hooks);
 };

@@ -8,7 +8,7 @@ module.exports = function (app) {
   const { Schema } = mongooseClient;
   const schema = new Schema({
     board_name: { type: String, required: true },
-    board_tag_id: { type: String },
+    board_tag_id: { type: Array, default: [] },
     board_images: { type: Array, default: [] },
     board_content: { type: String, required: true },
     board_liked: { type: Array },

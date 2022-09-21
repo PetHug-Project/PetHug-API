@@ -26,7 +26,8 @@ exports.Boards = class Boards extends Service {
       board_images: 1,
       liked: { $size: "$board_liked" },
       createdAt: 1,
-      updatedAt: 1
+      updatedAt: 1,
+      board_tag_id: 1,
     }
     if (params.headers.user_id) {
       boardProjection["isLiked"] = { $in: [params.headers.user_id, "$board_liked"] }
@@ -40,6 +41,34 @@ exports.Boards = class Boards extends Service {
             { $limit: limit },
             {
               $project: boardProjection
+            },
+            {
+              $lookup: {
+                from: "board_tags",
+                let: { "stated_board_tag_id": "$board_tag_id" },
+                pipeline: [
+                  {
+                    $addFields: {
+                      boardTagId: {
+                        $toString: "$_id"
+                      },
+                      stated_board_tag_id: { $ifNull: ["$$stated_board_tag_id", []] }
+                    }
+                  },
+                  {
+                    $match: {
+                      $expr: { $in: ['$boardTagId', "$stated_board_tag_id"] }
+                    }
+                  },
+                  {
+                    $project: {
+                      _id: 1,
+                      tag_name: 1
+                    }
+                  }
+                ],
+                as: "tag_names"
+              }
             }
           ],
           pageInfo: [
@@ -201,7 +230,36 @@ exports.Boards = class Boards extends Service {
           likedCount: 1,
           createdAt: 1,
           updatedAt: 1,
-          user_id: 1
+          user_id: 1,
+          board_tag_id: 1,
+        }
+      },
+      {
+        $lookup: {
+          from: "board_tags",
+          let: { "stated_board_tag_id": "$board_tag_id" },
+          pipeline: [
+            {
+              $addFields: {
+                boardTagId: {
+                  $toString: "$_id"
+                },
+                stated_board_tag_id: { $ifNull: ["$$stated_board_tag_id", []] }
+              }
+            },
+            {
+              $match: {
+                $expr: { $in: ['$boardTagId', "$stated_board_tag_id"] }
+              }
+            },
+            {
+              $project: {
+                _id: 1,
+                tag_name: 1
+              }
+            }
+          ],
+          as: "tag_names"
         }
       }
     ])
@@ -346,5 +404,62 @@ exports.Boards = class Boards extends Service {
     }
 
     throw new Error("Delete Board Failed")
+  }
+
+  async getBoardByBoardTagId(board_tag_id, params) {
+    let { skip = 0, limit = 10 } = params.query
+    skip = Number(skip)
+    limit = Number(limit)
+    let boardProjection = {
+      _id: 1,
+      board_name: 1,
+      board_comment: 1,
+      board_images: 1,
+      liked: { $size: "$board_liked" },
+      createdAt: 1,
+      updatedAt: 1
+    }
+    if (params.headers.user_id) {
+      boardProjection["isLiked"] = { $in: [params.headers.user_id, "$board_liked"] }
+    }
+    let result = await super.Model.aggregate([
+      {
+        $facet: {
+          data: [
+            {
+              $match: {
+                board_tag_id: board_tag_id
+              }
+            },
+            { $sort: { createdAt: -1 } },
+            { $skip: Number(skip) },
+            { $limit: Number(limit) },
+            {
+              $project: boardProjection
+            }
+          ],
+          pageInfo: [
+            {
+              $match: {
+                board_tag_id: board_tag_id
+              }
+            },
+            { $group: { _id: null, count: { $sum: 1 } } },
+          ],
+        },
+      },
+      {
+        $project: {
+          data: 1,
+          total: { $arrayElemAt: ["$pageInfo.count", 0] },
+        }
+      }
+    ])
+    result = result[0]
+    result.skip = skip
+    result.limit = limit
+    result.totalPage = Math.ceil(result.total / limit)
+    result.currentPage = Math.ceil(skip / limit) + 1
+    return result
   }
 };
