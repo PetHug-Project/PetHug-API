@@ -25,8 +25,8 @@ exports.BoardComment = class BoardComment extends Service {
           data: [
             { $sort: { createdAt: -1 } },
             { $skip: skip },
-            { $limit: limit },
             { $match: { board_id: id } },
+            { $limit: limit },
             {
               $lookup: {
                 from: "board_comments",
