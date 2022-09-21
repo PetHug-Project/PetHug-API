@@ -1,19 +1,13 @@
-// boards-model.js - A mongoose model
+// board_tag-model.js - A mongoose model
 // 
 // See http://mongoosejs.com/docs/models.html
 // for more of what you can do here.
 module.exports = function (app) {
-  const modelName = 'boards';
+  const modelName = 'board_tag';
   const mongooseClient = app.get('mongooseClient');
   const { Schema } = mongooseClient;
   const schema = new Schema({
-    board_name: { type: String, required: true },
-    board_tag_id: { type: Array, default: [] },
-    board_images: { type: Array, default: [] },
-    board_content: { type: String, required: true },
-    board_liked: { type: Array },
-    board_comment: { type: Number, default: 0 },
-    user_id: { type: String, required: true },
+    tag_name: { type: String, required: true }
   }, {
     timestamps: true
   });
