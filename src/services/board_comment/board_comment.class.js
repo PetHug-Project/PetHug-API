@@ -12,6 +12,7 @@ exports.BoardComment = class BoardComment extends Service {
     data.user_id = user._id
     let result = await super.create(data, params)
     this.app.service("board-service").addComment(data.board_id, result._id.toString())
+    result.reply = []
     return result
   }
 
