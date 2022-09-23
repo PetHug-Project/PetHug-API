@@ -17,6 +17,9 @@ module.exports = function (app) {
   app.use('/board-comment-reply', {
     async create(data, params) {
       return await boardCommentReplyService.createBoardCommentReply(data, params);
+    },
+    async get(id, params) {
+      return await boardCommentReplyService.getMoreCommentReplyWithBoardCommentId(id, params);
     }
   })
   app.service("board-comment-reply").hooks(hooks);

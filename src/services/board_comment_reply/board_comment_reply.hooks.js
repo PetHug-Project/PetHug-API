@@ -2,10 +2,10 @@ const firebaseAuthHook = require("../../hooks/firebase-auth-hook");
 
 module.exports = {
   before: {
-    all: [firebaseAuthHook()],
+    all: [],
     find: [],
     get: [],
-    create: [],
+    create: [firebaseAuthHook()],
     update: [],
     patch: [],
     remove: []

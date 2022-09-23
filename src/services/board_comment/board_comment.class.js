@@ -25,9 +25,8 @@ exports.BoardComment = class BoardComment extends Service {
         $facet: {
           data: [
             { $sort: { createdAt: -1 } },
-            { $skip: skip },
             { $match: { board_id: id } },
-            { $limit: limit },
+            { $skip: skip },
             {
               $lookup: {
                 from: "board_comments",
@@ -68,8 +67,33 @@ exports.BoardComment = class BoardComment extends Service {
                             }
                           }
                         },
+                        { $limit: 1 },
+                        {
+                          $project: {
+                            _id: 1
+                          }
+                        }
                       ],
                       as: "reply"
+                    }
+                  },
+                  {
+                    $addFields: {
+                      isReply: {
+                        $toBool: {
+                          $size: "$reply"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    $project: {
+                      reply: 0
+                    }
+                  },
+                  {
+                    $addFields: {
+                      skip: 0
                     }
                   }
                 ],
@@ -83,6 +107,7 @@ exports.BoardComment = class BoardComment extends Service {
                 }
               }
             },
+            { $limit: limit },
           ],
           pageInfo: [
             { $match: { board_id: id } },
