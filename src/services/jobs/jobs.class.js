@@ -17,10 +17,6 @@ exports.Jobs = class Jobs {
     }
   }
 
-  async updateTest() {
-    await this.app.service('appointment-service').updateAppointmentNotification(appointmentId, SENDING)
-  }
-
   async sendMessageToLine(appointments) {
     for (let i = 0; i < appointments.length; i++) {
       const appointment = appointments[i];
