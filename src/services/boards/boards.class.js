@@ -184,7 +184,36 @@ exports.Boards = class Boards extends Service {
                 createdAt: 1,
                 isLiked: {
                   $in: [user_id, "$board_liked"]
-                }
+                },
+                board_tag_id: 1
+              }
+            },
+            {
+              $lookup: {
+                from: "board_tags",
+                let: { "stated_board_tag_id": "$board_tag_id" },
+                pipeline: [
+                  {
+                    $addFields: {
+                      boardTagId: {
+                        $toString: "$_id"
+                      },
+                      stated_board_tag_id: { $ifNull: ["$$stated_board_tag_id", []] }
+                    }
+                  },
+                  {
+                    $match: {
+                      $expr: { $in: ['$boardTagId', "$stated_board_tag_id"] }
+                    }
+                  },
+                  {
+                    $project: {
+                      _id: 1,
+                      tag_name: 1
+                    }
+                  }
+                ],
+                as: "tag_names"
               }
             },
             { $limit: size }
