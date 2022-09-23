@@ -9,6 +9,7 @@ const verifyLine = require('./verify-line/verify-line.service.js');
 const boardTag = require('./board_tag/board_tag.service.js');
 const appointment = require('./appointment/appointment.service.js');
 const jobs = require('./jobs/jobs.service.js');
+const lineService = require('./line-service/line-service.service.js');
 // eslint-disable-next-line no-unused-vars
 module.exports = function (app) {
   app.configure(users);
@@ -22,4 +23,5 @@ module.exports = function (app) {
   app.configure(boardTag);
   app.configure(appointment);
   app.configure(jobs);
+  app.configure(lineService);
 }
