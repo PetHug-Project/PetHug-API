@@ -14,5 +14,9 @@ module.exports = function (app) {
   const service = app.service('line-service');
   service.hooks(hooks);
 
-  
+  app.use('/send-message', {
+    async create(data, params) {
+      return await lineService.sendMessage(data, params)
+    }
+  })
 };

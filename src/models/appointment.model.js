@@ -9,7 +9,10 @@ module.exports = function (app) {
   const schema = new Schema({
     name: { type: String, required: true },
     description: { type: String, required: true },
-    datetime: { type: Date, required: true }, 
+    datetime: { type: Date, required: true },
+    user_id: { type: String, required: true },
+    status: { type: String, required: true },
+    line_uid: { type: String, required: true },
   }, {
     timestamps: true
   });

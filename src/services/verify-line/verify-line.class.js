@@ -1,10 +1,10 @@
 const { default: axios } = require("axios");
-
 /* eslint-disable no-unused-vars */
 exports.VerifyLine = class VerifyLine {
   constructor(options, app) {
     this.options = options || {};
     this.app = app
+    this.lineAccessToken = this.app.get('line_channel_access_token')
   }
 
   async verify(data, params) {
@@ -20,7 +20,7 @@ exports.VerifyLine = class VerifyLine {
     }, {
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer " + this.app.get('line_channel_access_token')
+        "Authorization": "Bearer " + this.lineAccessToken
       }
     })
     return { result: "SUCCESS" }
