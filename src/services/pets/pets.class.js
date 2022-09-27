@@ -103,7 +103,7 @@ exports.Pets = class Pets extends Service {
   }
 
   async findPetLost(params) {
-    let { limit = 3, sort = "desc", skip = 0 } = params.query
+    let { limit = 3, sort = "desc", skip = 0, search = "" } = params.query
     sort = sort == "desc" ? -1 : 1
     limit = Number(limit)
     skip = Number(skip)
@@ -112,6 +112,15 @@ exports.Pets = class Pets extends Service {
         $facet: {
           data: [
             { $match: { isLost: true } },
+            {
+              $match: {
+                $or: [
+                  { 'pet_breed': { $regex: search } },
+                  { 'pet_lost_details.petLostDetail': { $regex: search } },
+                  { 'pet_lost_details.petLostLocation': { $regex: search } }
+                ]
+              }
+            },
             { $sort: { "pet_lost_details.updatedAt": sort } },
             { $skip: skip },
             {
