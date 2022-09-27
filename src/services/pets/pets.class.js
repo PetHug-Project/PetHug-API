@@ -136,6 +136,15 @@ exports.Pets = class Pets extends Service {
           ],
           pageInfo: [
             { $match: { isLost: true } },
+            {
+              $match: {
+                $or: [
+                  { 'pet_breed': { $regex: search } },
+                  { 'pet_lost_details.petLostDetail': { $regex: search } },
+                  { 'pet_lost_details.petLostLocation': { $regex: search } }
+                ]
+              }
+            },
             { $group: { _id: null, count: { $sum: 1 } } },
           ]
         }
