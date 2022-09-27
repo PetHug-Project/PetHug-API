@@ -35,10 +35,10 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            docker ps
-            docker rm -f api
+            docker ps -a
+            docker-compose stop api
             docker pull ghcr.io/karnkm/pethug-project-api-dev:latest
             docker images
-            docker-compose up -d
+            docker-compose up -d api
             docker image prune -f
             docker ps -a

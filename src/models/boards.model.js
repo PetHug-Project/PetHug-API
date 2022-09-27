@@ -1,24 +1,21 @@
-// pet_history-model.js - A mongoose model
+// boards-model.js - A mongoose model
 // 
 // See http://mongoosejs.com/docs/models.html
 // for more of what you can do here.
 module.exports = function (app) {
-  const modelName = 'pet_history';
+  const modelName = 'boards';
   const mongooseClient = app.get('mongooseClient');
   const { Schema } = mongooseClient;
   const schema = new Schema({
-    pet_id: { type: String, required: true },
+    board_name: { type: String, required: true },
+    board_tag_id: { type: Array, default: [] },
+    board_images: { type: Array, default: [] },
+    board_content: { type: String, required: true },
+    board_liked: { type: Array },
+    board_comment: { type: Number, default: 0 },
     user_id: { type: String, required: true },
-    treat_type: { type: String, required: true },
-    treat_name: { type: String, required: true },
-    treat_date: { type: Date, required: true },
-    next_appointment: { type: Date },
-    pet_notes: { type: String },
-    last_weight: { type: Number },
-    treat_images: { type: Array },
   }, {
-    timestamps: true,
-    collection: 'pet_history'
+    timestamps: true
   });
 
   // This is necessary to avoid model compilation errors in watch mode

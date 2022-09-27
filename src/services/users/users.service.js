@@ -2,7 +2,7 @@
 const { Users } = require('./users.class');
 const createModel = require('../../models/users.model');
 const hooks = require('./users.hooks');
-const firebaseAuth = require("../../hooks/firebase-auth-hook");
+const firebaseAuthHook = require('../../hooks/firebase-auth-hook');
 
 module.exports = function (app) {
   const options = {
@@ -38,6 +38,9 @@ module.exports = function (app) {
   app.use('/user', {
     async get(id, params) {
       return await userService.getUser(id, params)
+    },
+    async patch(id, data, params) {
+      return await userService.patch(id, data, params)
     }
   })
   app.service('/user').hooks(hooks)
@@ -49,7 +52,25 @@ module.exports = function (app) {
   })
   app.service('/user/:user_id/pets').hooks({
     before: {
-      all: [firebaseAuth()],
+      all: [firebaseAuthHook()],
+    }
+  })
+
+  app.use('/users', {
+    async remove(id, params) {
+      return await userService.clearAllUser();
+    }
+  })
+
+  app.use('/user/data-public', {
+    async get(id, params) {
+      return await userService.getDataPublic(id, params)
+    }
+  })
+
+  app.use('/auth/dev/users/login', {
+    async create(data, params) {
+      return await userService.loginWithEmail(data, params)
     }
   })
 };

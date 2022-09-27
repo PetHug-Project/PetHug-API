@@ -1,7 +1,9 @@
 const { BadRequest, Forbidden, NotFound, NotAuthenticated } = require('@feathersjs/errors');
 const { default: axios } = require('axios');
 const { Service } = require('feathers-mongoose');
+const { AuthError } = require('../../constants/AuthError');
 const { firebaseAdmin, firebaseAuth, firebaseApiKey } = require("../../utils/firebaseInit")
+const { ObjectId } = require("mongoose").Types
 
 const firebaseAdminAuth = firebaseAdmin.auth()
 exports.Users = class Users extends Service {
@@ -16,47 +18,57 @@ exports.Users = class Users extends Service {
     delete data.__v
   }
 
-  async registerUser(data, params) {
-    let { email, password } = data
-    let user = await firebaseAdminAuth.createUser({
-      email: email,
-      password: password,
-      emailVerified: true,
-    })
-    try {
-      let { uid, providerData } = user
-      await super.create({ ...data, firebase_uid: uid, sign_in_provider: providerData[0].providerId })
-    } catch (error) {
-      throw error
+  async patch(id, data, params) {
+    let checkUser = await this.checkUser(id, params)
+    if (!checkUser) {
+      throw new Forbidden("Can't edit this user")
     }
-    return await this.loginUser(data)
+    let { email } = data
+    if (email) {
+      let user = await super.Model.findOne({ email: email })
+      if (user) {
+        if (user._id.toString() != id) {
+          throw new BadRequest("Email already exist")
+        }
+      }
+    }
+    const result = await super.patch(id, data, params)
+    this.modelProtector(result)
+    return result
+  }
+
+  async registerUser(data, params) {
+    const defaultUserImage = "https://cdn-icons-png.flaticon.com/512/634/634741.png"
+    if (!data.user_image) {
+      data.user_image = defaultUserImage
+    }
+    return await super.create({ ...data })
   }
 
   async loginUser(data, params) {
-    let { email, password } = data
-    let result = await firebaseAuth.signInWithEmailAndPassword(firebaseAuth.getAuth(), email, password)
-    let { uid, stsTokenManager: token } = result.user
-    delete token.expirationTime
-    let user = await super.Model.findOne({ firebase_uid: uid })
-    return { _id: user._id, fname: user.fname, lname: user.lname, token: token }
+    let { firebase_uid } = data
+    let user = await super.Model.findOne({ firebase_uid: firebase_uid })
+    return { _id: user._id, fname: user.fname, lname: user.lname, user_image: user.user_image, email: user.email, sign_in_provider: user.sign_in_provider }
   }
 
-  async refreshToken(data, params) {
+  async refreshToken(data, params) { // wait for test && ready to delete
     let { refreshToken } = data
     let apiKey = firebaseApiKey
     let refreshTokenURL = `https://securetoken.googleapis.com/v1/token?key=${apiKey}`
-    let result = await axios.post(refreshTokenURL, { refresh_token: refreshToken, grant_type: "refresh_token" })
-      .catch((error) => {
-        throw new BadRequest(error.response.data.error.message, error.response.data.error)
-      })
-    result = result.data
+    let result
+    try {
+      result = await axios.post(refreshTokenURL, { refresh_token: refreshToken, grant_type: "refresh_token" })
+      result = result.data
+    } catch (error) {
+      throw new BadRequest(error.response.data.error.message, error.response.data.error)
+    }
     return { accessToken: result.access_token, refreshToken: result.refresh_token }
   }
 
   async getUser(id, params) {
     let checkUser = await this.checkUser(id, params)
     if (!checkUser) {
-      return new Forbidden("Can't view this user")
+      throw new Forbidden("Can't view this user")
     }
     let user = await super.get(id, params)
     this.modelProtector(user)
@@ -83,9 +95,43 @@ exports.Users = class Users extends Service {
     let { user_id } = params.route
     let checkUser = await this.checkUser(user_id, params)
     if (!checkUser) {
-      return new Forbidden("Can't view this user")
+      throw new Forbidden("Can't view this user")
     }
     return await this.app.service('pets-service').findPetByUserId(user_id)
   }
 
+  async getDataPublic(id, params) {
+    let result = await super.Model.find({ _id: ObjectId(id) }, { _id: 1, fname: 1, lname: 1, user_image: 1 })
+    if (result.length <= 0) {
+      throw new NotFound("User not found")
+    }
+    return result[0]
+  }
+
+  async getDataFromFirebaseUid(firebaseUid) {
+    let result = await super.Model.find({ firebase_uid: firebaseUid }, { _id: 1, email: 1, fname: 1, lname: 1, user_image: 1 })
+    if (result.length <= 0) {
+      throw new NotFound("User not found")
+    }
+    return result[0]
+  }
+
+  // Dev env only
+  async clearAllUser() {
+    let users = (await firebaseAdminAuth.listUsers()).users
+    let uid = users.map(user => {
+      return user.uid
+    })
+    let result = await firebaseAdminAuth.deleteUsers(uid)
+    return result
+  }
+
+  async loginWithEmail(data, params) {
+    let { email, password } = data
+    let result = await firebaseAuth.signInWithEmailAndPassword(firebaseAuth.getAuth(), email, password)
+    let { user: userFirebase } = result
+    let accessToken = userFirebase.toJSON().stsTokenManager.accessToken
+    let user = await this.loginUser({ firebase_uid: userFirebase.uid }, params)
+    return { user, accessToken }
+  }
 };

@@ -1,11 +1,19 @@
 const { Service } = require('feathers-mongoose');
 const dayjs = require("dayjs")
 const { BadRequest } = require("@feathersjs/errors")
+const qrcode = require("qrcode")
 
 exports.Pets = class Pets extends Service {
   constructor(options, app) {
     super(options, app)
     this.app = app
+  }
+
+  async get(id, params) {
+    let pet = await super.get(id, params)
+    let petHistory = await this.app.service("pet-history-service").Model.find({ pet_id: pet._id.toString() })
+    pet.pet_history = petHistory
+    return pet
   }
 
   async createPet(data, params) {
@@ -26,6 +34,8 @@ exports.Pets = class Pets extends Service {
     }
     let petDetail = await super.create({ ...data, owner: owner })
     await userModel.updateOne({ _id: owner_id }, { $push: { pets: petDetail._id.toString() } })
+    let qrCode = `${this.app.get('web_host')}/pet/${petDetail._id.toString()}`
+    petDetail = await super.patch(petDetail._id, { qr_code_for_show: await this.generateQRCode(qrCode) })
     return petDetail
   }
 
@@ -40,7 +50,12 @@ exports.Pets = class Pets extends Service {
   }
 
   async findPetByUserId(userID) {
-    let pets = await super.find({ owner_id: userID, query: { $select: ["pet_image", "pet_name", "pet_birthdate"] } })
+    let pets = await super.find({
+      query: {
+        "owner.id": userID,
+        $select: ["pet_image", "pet_name", "pet_birthdate"]
+      }
+    })
     pets.data = pets.data.map(pet => {
       pet.age = this.calculateAge(pet.pet_birthdate)
       return pet
@@ -48,8 +63,30 @@ exports.Pets = class Pets extends Service {
     return pets
   }
 
+  async findPetFromQrcode(params) {
+    let { pet_id } = params.route
+    let petDetails = await super.get({ _id: pet_id }, { query: { $select: ["pet_image", "pet_name", "pet_birthdate", "pet_gender", "pet_type", "pet_breed", "pet_color", "isLost", "pet_lost_details"] } })
+    if (petDetails.isLost == true) {
+      return petDetails
+    }
+    delete petDetails.isLost
+    delete petDetails.pet_lost_details
+    return petDetails
+  }
+
   getModel() {
     return super.Model
+  }
+
+  async generateQRCode(text) {
+    let buffer = await qrcode.toBuffer(text, { type: 'png' })
+    let obj = {
+      buffer: buffer,
+      originalname: `${(require("crypto").randomBytes(5)).toString('hex')}-${dayjs().unix()}.png`
+    }
+    let uploadService = this.app.service("upload-service")
+    let { image_path } = await uploadService.resizeAndUpload(obj)
+    return image_path
   }
 
 };

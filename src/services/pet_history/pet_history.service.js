@@ -2,6 +2,7 @@
 const { PetHistory } = require('./pet_history.class');
 const createModel = require('../../models/pet_history.model');
 const hooks = require('./pet_history.hooks');
+const firebaseAuthHook = require('../../hooks/firebase-auth-hook');
 
 module.exports = function (app) {
   const options = {
@@ -26,6 +27,11 @@ module.exports = function (app) {
     },
     async remove(id, params) {
       return petHistoryService.deletePetHistory(id, params)
+    }
+  })
+  app.service('/pet-history').hooks({
+    before: {
+      all: [firebaseAuthHook()],
     }
   })
 
