@@ -115,9 +115,9 @@ exports.Pets = class Pets extends Service {
             {
               $match: {
                 $or: [
-                  { 'pet_breed': { $regex: search } },
-                  { 'pet_lost_details.petLostDetail': { $regex: search } },
-                  { 'pet_lost_details.petLostLocation': { $regex: search } }
+                  { 'pet_breed': { $regex: search, $options: "i" } },
+                  { 'pet_lost_details.petLostDetail': { $regex: search, $options: "i" } },
+                  { 'pet_lost_details.petLostLocation': { $regex: search, $options: "i" } }
                 ]
               }
             },
@@ -139,9 +139,9 @@ exports.Pets = class Pets extends Service {
             {
               $match: {
                 $or: [
-                  { 'pet_breed': { $regex: search } },
-                  { 'pet_lost_details.petLostDetail': { $regex: search } },
-                  { 'pet_lost_details.petLostLocation': { $regex: search } }
+                  { 'pet_breed': { $regex: search, $options: "i" } },
+                  { 'pet_lost_details.petLostDetail': { $regex: search, $options: "i" } },
+                  { 'pet_lost_details.petLostLocation': { $regex: search, $options: "i" } }
                 ]
               }
             },
