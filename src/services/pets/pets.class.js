@@ -2,6 +2,7 @@ const { Service } = require('feathers-mongoose');
 const dayjs = require("dayjs")
 const { BadRequest } = require("@feathersjs/errors")
 const qrcode = require("qrcode")
+const { ObjectId } = require("mongoose").Types
 
 exports.Pets = class Pets extends Service {
   constructor(options, app) {
@@ -87,6 +88,62 @@ exports.Pets = class Pets extends Service {
     let uploadService = this.app.service("upload-service")
     let { image_path } = await uploadService.resizeAndUpload(obj)
     return image_path
+  }
+
+  async createPetLost(data, params) {
+    let { petId, contactName, contactNumber, petLostDetail, petLostLocation, petImages } = data
+    let { uid } = params.decodeAccessToken
+    let { _id: userId } = await this.app.service("users-service").getDataFromFirebaseUid(uid)
+    userId = userId.toString()
+
+    let createdAt = dayjs().toDate()
+    let updatedAt = createdAt
+    let result = await super.Model.updateMany({ _id: ObjectId(petId), "owner.id": userId }, { isLost: true, pet_lost_details: { contactName, contactNumber, petLostDetail, petLostLocation, petImages, createdAt, updatedAt } })
+    return result
+  }
+
+  async findPetLost(params) {
+    let { limit = 3, sort = "desc", skip = 0 } = params.query
+    sort = sort == "desc" ? -1 : 1
+    limit = Number(limit)
+    skip = Number(skip)
+    let result = await super.Model.aggregate([
+      {
+        $facet: {
+          data: [
+            { $match: { isLost: true } },
+            { $sort: { "pet_lost_details.updatedAt": sort } },
+            { $skip: skip },
+            {
+              $project: {
+                _id: 1,
+                pet_image: 1,
+                pet_name: 1,
+                pet_type: 1,
+                pet_health_note: 1
+              }
+            },
+            { $limit: limit },
+          ],
+          pageInfo: [
+            { $match: { isLost: true } },
+            { $group: { _id: null, count: { $sum: 1 } } },
+          ]
+        }
+      },
+      {
+        $project: {
+          data: 1,
+          total: { $arrayElemAt: ["$pageInfo.count", 0] }
+        }
+      }
+    ])
+    result = result[0]
+    result.skip = skip
+    result.limit = limit
+    result.totalPage = Math.ceil(result.total / limit)
+    result.currentPage = Math.ceil(skip / limit) + 1
+    return result
   }
 
 };
