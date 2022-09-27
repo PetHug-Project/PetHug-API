@@ -12,6 +12,7 @@ exports.BoardComment = class BoardComment extends Service {
     data.user_id = user._id
     let result = await super.create(data, params)
     this.app.service("board-service").addComment(data.board_id, result._id.toString())
+    result.reply = []
     return result
   }
 
@@ -24,9 +25,8 @@ exports.BoardComment = class BoardComment extends Service {
         $facet: {
           data: [
             { $sort: { createdAt: -1 } },
-            { $skip: 0 },
-            { $limit: 10 },
             { $match: { board_id: id } },
+            { $skip: skip },
             {
               $lookup: {
                 from: "board_comments",
@@ -67,8 +67,33 @@ exports.BoardComment = class BoardComment extends Service {
                             }
                           }
                         },
+                        { $limit: 1 },
+                        {
+                          $project: {
+                            _id: 1
+                          }
+                        }
                       ],
                       as: "reply"
+                    }
+                  },
+                  {
+                    $addFields: {
+                      isReply: {
+                        $toBool: {
+                          $size: "$reply"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    $project: {
+                      reply: 0
+                    }
+                  },
+                  {
+                    $addFields: {
+                      skip: 0
                     }
                   }
                 ],
@@ -82,8 +107,10 @@ exports.BoardComment = class BoardComment extends Service {
                 }
               }
             },
+            { $limit: limit },
           ],
           pageInfo: [
+            { $match: { board_id: id } },
             { $group: { _id: null, count: { $sum: 1 } } },
           ],
         },

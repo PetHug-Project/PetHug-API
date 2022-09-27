@@ -1,7 +1,6 @@
 const { BadRequest, Forbidden, NotFound, NotAuthenticated } = require('@feathersjs/errors');
 const { default: axios } = require('axios');
 const { Service } = require('feathers-mongoose');
-const { AuthError } = require('../../constants/AuthError');
 const { firebaseAdmin, firebaseAuth, firebaseApiKey } = require("../../utils/firebaseInit")
 const { ObjectId } = require("mongoose").Types
 
