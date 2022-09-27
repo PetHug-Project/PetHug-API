@@ -15,9 +15,12 @@ exports.Boards = class Boards extends Service {
   }
 
   async findAllBoards(params) {
-    let { skip = 0, limit = 10 } = params.query
+    // บอร์ดยอดนิยม บอร์ดใหม่ เรียงตามตัวอักษร A-Z , Z-A
+    let { skip = 0, limit = 10, searchBar = "", sortChar = "desc", recommend = "false" } = params.query
     skip = Number(skip)
     limit = Number(limit)
+    sortChar = sortChar === "desc" ? -1 : 1
+    recommend = recommend == "true" ? true : false
     let boardProjection = {
       _id: 1,
       board_name: 1,
@@ -28,19 +31,31 @@ exports.Boards = class Boards extends Service {
       createdAt: 1,
       updatedAt: 1,
       board_tag_id: 1,
+      board_name_insensitive: { $toLower: "$board_name" }
     }
+    let sortBy = {}
+    if (recommend) {
+      sortBy['liked'] = -1
+    }
+    if (sortChar) {
+      sortBy['board_name_insensitive'] = sortChar
+    }
+    sortBy['createdAt'] = -1
     if (params.headers.user_id) {
       boardProjection["isLiked"] = { $in: [params.headers.user_id, "$board_liked"] }
     }
+
     let result = await super.Model.aggregate([
       {
         $facet: {
           data: [
-            { $sort: { createdAt: -1 } },
             { $skip: skip },
-            { $limit: limit },
+            { $match: { board_name: { $regex: searchBar, $options: "i" } } },
             {
               $project: boardProjection
+            },
+            {
+              $sort: sortBy
             },
             {
               $lookup: {
@@ -69,9 +84,11 @@ exports.Boards = class Boards extends Service {
                 ],
                 as: "tag_names"
               }
-            }
+            },
+            { $limit: limit },
           ],
           pageInfo: [
+            { $match: { board_name: { $regex: searchBar, $options: "i" } } },
             { $group: { _id: null, count: { $sum: 1 } } },
           ],
         },
