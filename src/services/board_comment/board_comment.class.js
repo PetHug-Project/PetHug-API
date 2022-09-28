@@ -1,4 +1,5 @@
 const { Service } = require('feathers-mongoose');
+const { NotificationType } = require('../../constants/NotificationType');
 
 exports.BoardComment = class BoardComment extends Service {
   constructor(options, app) {
@@ -11,7 +12,7 @@ exports.BoardComment = class BoardComment extends Service {
     let user = await this.app.service("users-service").getDataFromFirebaseUid(uid)
     data.user_id = user._id
     let result = await super.create(data, params)
-    this.app.service("board-service").addComment(data.board_id, result._id.toString())
+    await this.app.service("board-service").addComment(data.board_id, user, NotificationType.COMMENTED)
     result.reply = []
     return result
   }

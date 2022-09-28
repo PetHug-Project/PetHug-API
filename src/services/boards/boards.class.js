@@ -1,4 +1,5 @@
 const { Service } = require('feathers-mongoose');
+const { NotificationType } = require('../../constants/NotificationType');
 const { ObjectId } = require("mongoose").Types
 
 exports.Boards = class Boards extends Service {
@@ -108,8 +109,14 @@ exports.Boards = class Boards extends Service {
     return result
   }
 
-  async addComment(boardId) {
-    return await super.Model.updateOne({ _id: ObjectId(boardId) }, { $inc: { board_comment: 1 } })
+  async addComment(boardId, user, notificationType) {
+    let { modifiedCount } = await super.Model.updateOne({ _id: ObjectId(boardId) }, { $inc: { board_comment: 1 } })
+    if (modifiedCount == 0) {
+      return
+    }
+    let boardData = await super.Model.findOne({ _id: ObjectId(boardId) })
+    await this.app.service("notification-service").createNotification({ type: notificationType, boardData: boardData, user: user })
+    return
   }
 
   async likeBoard(id, params) {
@@ -117,6 +124,8 @@ exports.Boards = class Boards extends Service {
     let user = await this.app.service("users-service").getDataFromFirebaseUid(uid)
     let user_id = user._id.toString()
     let result = await super.Model.updateOne({ _id: ObjectId(id) }, { $addToSet: { board_liked: user_id } })
+    let boardData = await super.Model.findOne({ _id: ObjectId(id) })
+    await this.app.service("notification-service").createNotification({ type: NotificationType.LIKED, boardData: boardData, user: user, }, params)
     return result
   }
 
