@@ -17,11 +17,9 @@ exports.Boards = class Boards extends Service {
 
   async findAllBoards(params) {
     // บอร์ดยอดนิยม บอร์ดใหม่ เรียงตามตัวอักษร A-Z , Z-A
-    let { skip = 0, limit = 10, searchBar = "", sortChar = "desc", recommend = "false" } = params.query
+    let { skip = 0, limit = 10, searchBar = "", sortChar = "", recommend = "" } = params.query
     skip = Number(skip)
     limit = Number(limit)
-    sortChar = sortChar === "desc" ? -1 : 1
-    recommend = recommend == "true" ? true : false
     let boardProjection = {
       _id: 1,
       board_name: 1,
@@ -36,16 +34,19 @@ exports.Boards = class Boards extends Service {
     }
     let sortBy = {}
     if (recommend) {
-      sortBy['liked'] = -1
+      sortBy['liked'] = recommend == "true" ? -1 : 1
+      sortBy['createdAt'] = -1
     }
     if (sortChar) {
-      sortBy['board_name_insensitive'] = sortChar
+      sortBy['board_name_insensitive'] = sortChar == "asc" ? 1 : -1
+      sortBy['createdAt'] = -1
     }
-    sortBy['createdAt'] = -1
+    if (!sortChar && !recommend) {
+      sortBy['createdAt'] = -1
+    }
     if (params.headers.user_id) {
       boardProjection["isLiked"] = { $in: [params.headers.user_id, "$board_liked"] }
     }
-
     let result = await super.Model.aggregate([
       {
         $facet: {
