@@ -10,10 +10,10 @@ module.exports = function (app) {
   };
 
   // Initialize our service with any options it requires
-  app.use('/notification', new Notification(options, app));
+  const notificationService = new Notification(options, app)
+  app.use('/notification-service', notificationService);
 
   // Get our initialized service so that we can register hooks
-  const service = app.service('notification');
+  app.service('notification-service').hooks(hooks)
 
-  service.hooks(hooks);
 };
