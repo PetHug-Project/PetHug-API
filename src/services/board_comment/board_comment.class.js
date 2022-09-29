@@ -12,6 +12,7 @@ exports.BoardComment = class BoardComment extends Service {
     let user = await this.app.service("users-service").getDataFromFirebaseUid(uid)
     data.user_id = user._id
     let result = await super.create(data, params)
+    result.user = await this.app.service("users-service").getDataPublic(user._id)
     await this.app.service("board-service").addComment(data.board_id, user, NotificationType.COMMENTED)
     result.reply = []
     return result
@@ -29,13 +30,20 @@ exports.BoardComment = class BoardComment extends Service {
             { $match: { board_id: id } },
             { $skip: skip },
             {
+              $addFields: {
+                commentId: {
+                  $toString: "$_id"
+                }
+              }
+            },
+            {
               $lookup: {
-                from: "board_comments",
-                let: { "stated_comment_id": "$_id" },
+                from: "users",
+                let: { "userId": "$user_id" },
                 pipeline: [
                   {
                     $addFields: {
-                      commentId: {
+                      userId: {
                         $toString: "$_id"
                       }
                     }
@@ -43,69 +51,71 @@ exports.BoardComment = class BoardComment extends Service {
                   {
                     $match: {
                       $expr: {
-                        $eq: ["$commentId", {
-                          $toString: "$$stated_comment_id"
-                        }]
-                      }
-                    }
-                  },
-                  {
-                    $lookup: {
-                      from: "board_comment_replies",
-                      let: { "reply_comment_id": "$$stated_comment_id" },
-                      pipeline: [
-                        {
-                          $sort: {
-                            createdAt: -1
-                          }
-                        },
-                        {
-                          $match: {
-                            $expr: {
-                              $eq: ["$board_comment_id", {
-                                $toString: "$$stated_comment_id"
-                              }]
-                            }
-                          }
-                        },
-                        { $limit: 1 },
-                        {
-                          $project: {
-                            _id: 1
-                          }
-                        }
-                      ],
-                      as: "reply"
-                    }
-                  },
-                  {
-                    $addFields: {
-                      isReply: {
-                        $toBool: {
-                          $size: "$reply"
-                        }
+                        $eq: ["$userId", "$$userId"]
                       }
                     }
                   },
                   {
                     $project: {
-                      reply: 0
-                    }
-                  },
-                  {
-                    $addFields: {
-                      skip: 0
+                      user_image: 1,
+                      fname: 1,
+                      lname: 1,
                     }
                   }
                 ],
-                as: "comments"
+                as: "user"
+              }
+            },
+            {
+              $addFields: {
+                user: { $arrayElemAt: ["$user", 0] }
+              }
+            },
+            {
+              $lookup: {
+                from: "board_comment_replies",
+                let: { "reply_comment_id": "$commentId" },
+                pipeline: [
+                  {
+                    $sort: {
+                      createdAt: -1
+                    }
+                  },
+                  {
+                    $match: {
+                      $expr: {
+                        $eq: ["$board_comment_id", "$$reply_comment_id"]
+                      }
+                    }
+                  },
+                  { $limit: 1 },
+                  {
+                    $project: {
+                      _id: 1
+                    }
+                  }
+                ],
+                as: "reply"
+              }
+            },
+            {
+              $addFields: {
+                isReply: {
+                  $toBool: {
+                    $size: "$reply"
+                  }
+                }
               }
             },
             {
               $project: {
-                comments: {
-                  $arrayElemAt: ["$comments", 0]
-                }
+                reply: 0,
+                __v: 0,
+              }
+            },
+            {
+              $addFields: {
+                skip: 0
               }
             },
             { $limit: limit },
@@ -119,7 +129,7 @@ exports.BoardComment = class BoardComment extends Service {
       {
         $project: {
           total: { $arrayElemAt: ["$pageInfo.count", 0] },
-          data: "$data.comments",
+          data: "$data",
         }
       }
     ])

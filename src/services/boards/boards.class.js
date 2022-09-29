@@ -317,6 +317,41 @@ exports.Boards = class Boards extends Service {
           ],
           as: "tag_names"
         }
+      },
+      {
+        $lookup: {
+          from: "users",
+          let: { "userId": "$user_id" },
+          pipeline: [
+            {
+              $addFields: {
+                userId: {
+                  $toString: "$_id"
+                }
+              }
+            },
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$userId", "$$userId"]
+                }
+              }
+            },
+            {
+              $project: {
+                user_image: 1,
+                fname: 1,
+                lname: 1,
+              }
+            }
+          ],
+          as: "user"
+        }
+      },
+      {
+        $addFields: {
+          user: { $arrayElemAt: ["$user", 0] }
+        }
       }
     ])
     result = result[0]
