@@ -8,10 +8,9 @@ module.exports = function (app) {
   const { Schema } = mongooseClient;
   const schema = new Schema({
     user_id: { type: String, required: true },
-    message: { type: String, required: true },
-    notificationStatus: { type: String, required: true },
-    notificationType: { type: String, required: true },
-    notificationFrom: { type: String, required: true },
+    notification_status: { type: String, required: true },
+    notification_type: { type: String, required: true },
+    notification_from: { type: String, required: true },
   }, {
     timestamps: true
   });

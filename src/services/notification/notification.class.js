@@ -32,21 +32,50 @@ exports.Notification = class Notification extends Service {
                 createdAt: -1
               }
             },
+            {
+              $lookup: {
+                from: "users",
+                let: { "userId": "$notification_from" },
+                pipeline: [
+                  {
+                    $addFields: {
+                      userId: {
+                        $toString: "$_id"
+                      }
+                    }
+                  },
+                  {
+                    $match: {
+                      $expr: {
+                        $eq: ["$userId", "$$userId"]
+                      }
+                    }
+                  },
+                  {
+                    $project: {
+                      user_image: 1,
+                      fname: 1,
+                      lname: 1,
+                    }
+                  }
+                ],
+                as: "user"
+              }
+            },
+            {
+              $addFields: {
+                notification_from: { $arrayElemAt: ["$user", 0] }
+              }
+            },
+            {
+              $project: {
+                __v: 0,
+                user: 0,
+              }
+            },
             { $skip: skip },
             { $limit: limit }
-          ],
-          pageInfo: [
-            {
-              $match: { user_id: userId }
-            },
-            { $group: { _id: null, count: { $sum: 1 } } },
           ]
-        }
-      },
-      {
-        $project: {
-          data: 1,
-          total: { $arrayElemAt: ["$pageInfo.count", 0] }
         }
       }
     ])
@@ -60,24 +89,8 @@ exports.Notification = class Notification extends Service {
 
   async createNotification(data, params) {
     let { type, user, boardData } = data
-    switch (type) {
-      case NotificationType.LIKED:
-        return this.createLikedNotification(boardData, user)
-      case NotificationType.COMMENTED:
-        return this.createCommentedNotification(boardData, user)
-      case NotificationType.REPLY:
-        return this.createReplyNotification(boardData, user)
-      default:
-        break;
-    }
-    // let notification = await this.create(data)
-    // return notification
-  }
-
-  async createLikedNotification(boardData, user) {
-    const notificationMessage = 'ได้กดถูกใจบอร์ดของคุณ'
     let { user_id: ownerId } = boardData
-    let { _id: userId, fname: userFname } = user
+    let { _id: userId } = user
     userId = userId.toString()
     if (ownerId === userId) {
       return
@@ -85,51 +98,11 @@ exports.Notification = class Notification extends Service {
 
     let notification = await this.create({
       user_id: ownerId,
-      message: notificationMessage,
-      notificationStatus: NotificationStatus.UNREAD,
-      notificationType: NotificationType.LIKED,
-      notificationFrom: userFname,
-    })
-
-    return notification
-  }
-
-  async createCommentedNotification(boardData, user) {
-    const notificationMessage = 'ได้แสดงความคิดเห็นบอร์ดของคุณ'
-    let { user_id: ownerId } = boardData
-    let { _id: userId, fname: userFname } = user
-    userId = userId.toString()
-    if (ownerId === userId) {
-      return
-    }
-
-    let notification = await this.create({
-      user_id: ownerId,
-      message: notificationMessage,
-      notificationStatus: NotificationStatus.UNREAD,
-      notificationType: NotificationType.COMMENTED,
-      notificationFrom: userFname,
-    })
-
-    return notification
-  }
-
-  async createReplyNotification(boardData, user) {
-    const notificationMessage = 'ได้ตอบความคิดเห็นบอร์ดของคุณ'
-    let { user_id: ownerId } = boardData
-    let { _id: userId, fname: userFname } = user
-    userId = userId.toString()
-    if (ownerId === userId) {
-      return
-    }
-
-    let notification = await this.create({
-      user_id: ownerId,
-      message: notificationMessage,
-      notificationStatus: NotificationStatus.UNREAD,
-      notificationType: NotificationType.REPLY,
-      notificationFrom: userFname,
+      notification_status: NotificationStatus.UNREAD,
+      notification_type: type,
+      notification_from: userId,
     })
     return notification
   }
+
 };
