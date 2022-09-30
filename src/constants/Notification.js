@@ -5,3 +5,9 @@ exports.NotificationType = {
   REPLY: "REPLY",
   SCAN_PET_LOST: "SCAN_PET_LOST",
 }
+
+exports.NotificationStatus = {
+  UNREAD: 'UNREAD',
+  READ: 'READ',
+  DELETE: 'DELETE',
+}

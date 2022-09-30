@@ -1,5 +1,5 @@
 const { Service } = require('feathers-mongoose');
-const { NotificationType } = require('../../constants/NotificationType');
+const { NotificationType } = require('../../constants/Notification');
 
 exports.BoardComment = class BoardComment extends Service {
   constructor(options, app) {

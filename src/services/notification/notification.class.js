@@ -1,9 +1,5 @@
 const { Service } = require('feathers-mongoose');
-const { NotificationType } = require('../../constants/NotificationType');
-const NotificationStatus = {
-  UNREAD: 'UNREAD',
-  READ: 'READ',
-}
+const { NotificationStatus } = require('../../constants/Notification');
 
 exports.Notification = class Notification extends Service {
   constructor(options, app) {
@@ -26,6 +22,13 @@ exports.Notification = class Notification extends Service {
           data: [
             {
               $match: { user_id: userId }
+            },
+            {
+              $match: {
+                notification_status: {
+                  $ne: NotificationStatus.DELETE
+                }
+              }
             },
             {
               $sort: {
@@ -73,9 +76,28 @@ exports.Notification = class Notification extends Service {
                 user: 0,
               }
             },
-            { $skip: skip },
-            { $limit: limit }
+            { $skip: 0 },
+            { $limit: 10 }
+          ],
+          pageInfo: [
+            {
+              $match: { user_id: userId }
+            },
+            {
+              $match: {
+                notification_status: {
+                  $ne: NotificationStatus.DELETE
+                }
+              }
+            },
+            { $group: { _id: null, count: { $sum: 1 } } },
           ]
+        }
+      },
+      {
+        $project: {
+          data: 1,
+          total: { $arrayElemAt: ["$pageInfo.count", 0] }
         }
       }
     ])
@@ -103,6 +125,48 @@ exports.Notification = class Notification extends Service {
       notification_from: userId,
     })
     return notification
+  }
+
+  async readNotification(data, params) {
+    let { notifications } = data
+    let { uid } = params.decodeAccessToken
+    let user = await this.app.service("users-service").getDataFromFirebaseUid(uid)
+    let { _id: userId } = user
+    userId = userId.toString()
+
+    let result = await super.Model.updateMany(
+      {
+        _id: { $in: notifications },
+        user_id: userId,
+      },
+      {
+        $set: {
+          notification_status: NotificationStatus.READ
+        }
+      }
+    )
+    return result
+  }
+
+  async deleteNotification(data, params) {
+    let { notifications } = data
+    let { uid } = params.decodeAccessToken
+    let user = await this.app.service("users-service").getDataFromFirebaseUid(uid)
+    let { _id: userId } = user
+    userId = userId.toString()
+
+    let result = await super.Model.updateMany(
+      {
+        _id: { $in: notifications },
+        user_id: userId,
+      },
+      {
+        $set: {
+          notification_status: NotificationStatus.DELETE
+        }
+      }
+    )
+    return result
   }
 
 };

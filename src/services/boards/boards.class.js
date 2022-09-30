@@ -1,5 +1,5 @@
 const { Service } = require('feathers-mongoose');
-const { NotificationType } = require('../../constants/NotificationType');
+const { NotificationType } = require('../../constants/Notification');
 const { ObjectId } = require("mongoose").Types
 
 exports.Boards = class Boards extends Service {

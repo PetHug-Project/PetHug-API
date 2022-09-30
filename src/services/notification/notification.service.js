@@ -13,19 +13,40 @@ module.exports = function (app) {
   // Initialize our service with any options it requires
   const notificationService = new Notification(options, app)
   app.use('/notification-service', notificationService);
+  // Get our initialized service so that we can register hooks
+  app.service('notification-service').hooks(hooks)
 
   app.use('/notification-user', {
     async find(params) {
       return notificationService.findNotificationByUserId(params)
-    }
+    },
   })
   app.service('notification-user').hooks({
     before: {
       find: [firebaseAuthHook()]
     }
-  });
+  })
 
-  // Get our initialized service so that we can register hooks
-  app.service('notification-service').hooks(hooks)
+  app.use('/read-notification', {
+    async create(data, params) {
+      return notificationService.readNotification(data, params)
+    },
+  })
+  app.service('read-notification').hooks({
+    before: {
+      create: [firebaseAuthHook()]
+    }
+  })
+
+  app.use('/delete-notification', {
+    async create(data, params) {
+      return notificationService.deleteNotification(data, params)
+    }
+  })
+  app.service('delete-notification').hooks({
+    before: {
+      create: [firebaseAuthHook()]
+    }
+  })
 
 };
