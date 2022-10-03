@@ -11,7 +11,7 @@ exports.Jobs = class Jobs {
 
   async findTodoJobs() {
     const appointmentService = this.app.service('appointment-service');
-    let appointments = await appointmentService.findAppointment()
+    let appointments = await appointmentService.findTodoJobs()
     if (appointments.length > 0) {
       this.sendMessageToLine(appointments)
     }
@@ -20,9 +20,9 @@ exports.Jobs = class Jobs {
   async sendMessageToLine(appointments) {
     for (let i = 0; i < appointments.length; i++) {
       const appointment = appointments[i];
-      let { name, line_uid, description, _id: appointmentId } = appointment
+      let { name, line_uid, description, _id: appointmentId, datetime } = appointment
       appointmentId = appointmentId.toString()
-      await this.app.service('line-service').sendFlexMessage(line_uid, name, description, appointmentId)
+      await this.app.service('line-service').sendFlexMessage(line_uid, name, description, datetime, appointmentId)
     }
   }
 

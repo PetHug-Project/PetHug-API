@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 const line = require('@line/bot-sdk');
-const { SENDED, SENDING } = require('../../constants/AppointmentStatus').STATUS;
+const dayjs = require('dayjs');
+const { SENDED, SENDING, FAILED } = require('../../constants/AppointmentStatus').STATUS;
 exports.LineService = class LineService {
   constructor(options, app) {
     this.options = options || {};
@@ -49,68 +50,146 @@ exports.LineService = class LineService {
     return result
   }
 
-  async sendFlexMessage(lineUid, appointName, appointDescription, appointmentId) {
+  async sendFlexMessage(lineUid, appointName, appointDescription, appointmentDate, appointmentId) {
+    let { start_at, end_at } = appointmentDate
     const altText = 'แจ้งเตือนการนัดหมายจาก PETHUG'
     await this.app.service('appointment-service').updateAppointmentNotification(appointmentId, SENDING)
-    let result = await this.lineClient.pushMessage(lineUid, {
-      type: 'flex',
-      altText: altText,
-      contents: {
-        type: "bubble",
-        size: "giga",
-        direction: "ltr",
-        header: {
-          type: "box",
-          layout: "vertical",
-          contents: [
-            {
-              type: "text",
-              text: "คุณมีการนัดหมาย",
-              weight: "bold",
-              align: "center",
-              contents: []
+    let result
+    try {
+      result = await this.lineClient.pushMessage(lineUid, {
+        type: 'flex',
+        altText: altText,
+        contents: {
+          type: "bubble",
+          hero: {
+            type: "image",
+            url: "https://i.imgur.com/BPebLLC.png",
+            size: "full",
+            aspectRatio: "20:13",
+            aspectMode: "cover",
+            action: {
+              type: "uri",
+              label: "Line",
+              uri: "https://linecorp.com/"
             }
-          ]
-        },
-        hero: {
-          type: "image",
-          url: "https://vos.line-scdn.net/bot-designer-template-images/bot-designer-icon.png",
-          size: "full",
-          aspectRatio: "1.51:1",
-          aspectMode: "fit"
-        },
-        body: {
-          type: "box",
-          layout: "vertical",
-          contents: [
-            {
-              type: "text",
-              text: `หัวข้อ : ${appointName}`,
-              weight: "bold",
-              size: "xxl",
-              align: "center",
-              wrap: true,
-              contents: []
-            }
-          ]
-        },
-        footer: {
-          type: "box",
-          layout: "horizontal",
-          contents: [
-            {
-              type: "text",
-              text: `เนื้อหา: ${appointDescription}`,
-              weight: "regular",
-              size: "xxl",
-              align: "center",
-              wrap: true,
-              contents: []
-            }
-          ]
+          },
+          body: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+              {
+                type: "text",
+                text: appointName,
+                weight: "bold",
+                size: "xl",
+                contents: []
+              },
+              {
+                type: "box",
+                layout: "vertical",
+                spacing: "sm",
+                margin: "lg",
+                contents: [
+                  {
+                    type: "box",
+                    layout: "baseline",
+                    spacing: "sm",
+                    contents: [
+                      {
+                        type: "text",
+                        text: "สถานที่",
+                        size: "sm",
+                        color: "#AAAAAA",
+                        contents: []
+                      },
+                      {
+                        type: "text",
+                        text: appointDescription,
+                        size: "sm",
+                        color: "#666666",
+                        flex: 3,
+                        wrap: true,
+                        contents: []
+                      }
+                    ]
+                  },
+                  {
+                    type: "box",
+                    layout: "baseline",
+                    contents: [
+                      {
+                        type: "text",
+                        text: "วันที่",
+                        size: "sm",
+                        color: "#AAAAAA",
+                        contents: []
+                      },
+                      {
+                        type: "text",
+                        text: dayjs(start_at).format('DD/MM/YYYY'),
+                        size: "sm",
+                        color: "#666666",
+                        flex: 3,
+                        contents: []
+                      }
+                    ]
+                  },
+                  {
+                    type: "box",
+                    layout: "baseline",
+                    spacing: "sm",
+                    contents: [
+                      {
+                        type: "text",
+                        text: "เวลา",
+                        size: "sm",
+                        color: "#AAAAAAFF",
+                        contents: []
+                      },
+                      {
+                        type: "text",
+                        text: `${dayjs(start_at).format('HH:mm')} - ${dayjs(end_at).format('HH:mm')}`,
+                        size: "sm",
+                        color: "#666666",
+                        flex: 3,
+                        wrap: true,
+                        contents: []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          footer: {
+            type: "box",
+            layout: "vertical",
+            flex: 0,
+            spacing: "sm",
+            contents: [
+              {
+                type: "button",
+                action: {
+                  type: "uri",
+                  label: "WEBSITE",
+                  uri: "https://dev.pethug-project.com/"
+                },
+                height: "sm",
+                style: "link"
+              },
+              {
+                type: "spacer",
+                size: "sm"
+              }
+            ]
+          }
         }
-      }
-    });
+      })
+    } catch (error) {
+      console.log(error)
+      await this.app.service('appointment-service').updateAppointmentNotification(appointmentId, FAILED)
+    }
+
     if (result) {
       await this.app.service('appointment-service').updateAppointmentNotification(appointmentId, SENDED)
     }
