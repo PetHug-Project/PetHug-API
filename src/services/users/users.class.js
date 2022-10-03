@@ -108,7 +108,7 @@ exports.Users = class Users extends Service {
   }
 
   async getDataFromFirebaseUid(firebaseUid) {
-    let result = await super.Model.find({ firebase_uid: firebaseUid }, { _id: 1, email: 1, fname: 1, lname: 1, user_image: 1 })
+    let result = await super.Model.find({ firebase_uid: firebaseUid }, { _id: 1, email: 1, fname: 1, lname: 1, user_image: 1, line_uid: 1 })
     if (result.length <= 0) {
       throw new NotFound("User not found")
     }

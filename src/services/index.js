@@ -7,6 +7,9 @@ const boardComment = require('./board_comment/board_comment.service.js');
 const boardCommentReply = require('./board_comment_reply/board_comment_reply.service.js');
 const verifyLine = require('./verify-line/verify-line.service.js');
 const boardTag = require('./board_tag/board_tag.service.js');
+const appointment = require('./appointment/appointment.service.js');
+const jobs = require('./jobs/jobs.service.js');
+const lineService = require('./line-service/line-service.service.js');
 const notification = require('./notification/notification.service.js');
 // eslint-disable-next-line no-unused-vars
 module.exports = function (app) {
@@ -19,5 +22,8 @@ module.exports = function (app) {
   app.configure(boardCommentReply);
   app.configure(verifyLine);
   app.configure(boardTag);
+  app.configure(appointment);
+  app.configure(jobs);
+  app.configure(lineService);
   app.configure(notification);
 }
