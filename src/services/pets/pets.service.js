@@ -2,6 +2,7 @@
 const { Pets } = require('./pets.class');
 const createModel = require('../../models/pets.model');
 const hooks = require('./pets.hooks');
+const firebaseAuthHook = require('../../hooks/firebase-auth-hook');
 
 module.exports = function (app) {
   const options = {
@@ -31,6 +32,23 @@ module.exports = function (app) {
   app.use('/pet/:pet_id/qrcode', {
     async find(params) {
       return await petService.findPetFromQrcode(params)
+    }
+  })
+
+  app.use('/pet/pet-lost', {
+    async create(data, params) {
+      return await petService.createPetLost(data, params)
+    },
+  })
+  app.service('pet/pet-lost').hooks({
+    before: {
+      create: [firebaseAuthHook()]
+    }
+  })
+
+  app.use('/find-pet-lost', {
+    async find(params) {
+      return await petService.findPetLost(params)
     }
   })
 };

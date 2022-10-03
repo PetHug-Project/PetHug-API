@@ -1,4 +1,5 @@
 const { Service } = require('feathers-mongoose');
+const { NotificationType } = require('../../constants/Notification');
 
 exports.BoardCommentReply = class BoardCommentReply extends Service {
   constructor(options, app) {
@@ -11,7 +12,8 @@ exports.BoardCommentReply = class BoardCommentReply extends Service {
     let user = await this.app.service("users-service").getDataFromFirebaseUid(uid)
     data.user_id = user._id
     let result = await super.create(data, params)
-    this.app.service("board-service").addComment(data.board_id, result._id.toString())
+    result.user = await this.app.service("users-service").getDataPublic(user._id)
+    this.app.service("board-service").addComment(data.board_id, user, NotificationType.REPLY)
     return result
   }
 
@@ -29,6 +31,41 @@ exports.BoardCommentReply = class BoardCommentReply extends Service {
               $match: {
                 board_comment_id: boardCommentId,
                 board_id: boardId
+              }
+            },
+            {
+              $lookup: {
+                from: "users",
+                let: { "userId": "$user_id" },
+                pipeline: [
+                  {
+                    $addFields: {
+                      userId: {
+                        $toString: "$_id"
+                      }
+                    }
+                  },
+                  {
+                    $match: {
+                      $expr: {
+                        $eq: ["$userId", "$$userId"]
+                      }
+                    }
+                  },
+                  {
+                    $project: {
+                      user_image: 1,
+                      fname: 1,
+                      lname: 1,
+                    }
+                  }
+                ],
+                as: "user"
+              }
+            },
+            {
+              $addFields: {
+                user: { $arrayElemAt: ["$user", 0] }
               }
             },
             { $skip: skip },
