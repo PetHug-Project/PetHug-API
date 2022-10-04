@@ -129,7 +129,8 @@ exports.Pets = class Pets extends Service {
                 pet_image: 1,
                 pet_name: 1,
                 pet_type: 1,
-                pet_health_note: 1
+                pet_health_note: 1,
+                pet_lost_details: 1
               }
             },
             { $limit: limit },
