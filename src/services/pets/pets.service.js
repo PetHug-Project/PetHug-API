@@ -3,6 +3,7 @@ const { Pets } = require('./pets.class');
 const createModel = require('../../models/pets.model');
 const hooks = require('./pets.hooks');
 const firebaseAuthHook = require('../../hooks/firebase-auth-hook');
+const notRequireLogin = require("../../hooks/notRequiredLogin")
 
 module.exports = function (app) {
   const options = {
@@ -29,6 +30,12 @@ module.exports = function (app) {
     }
   })
 
+  app.service('/pet').hooks({
+    before: {
+      all: [notRequireLogin()],
+    }
+  })
+
   app.use('/pet/:pet_id/qrcode', {
     async find(params) {
       return await petService.findPetFromQrcode(params)
@@ -39,10 +46,14 @@ module.exports = function (app) {
     async create(data, params) {
       return await petService.createPetLost(data, params)
     },
+    async patch(id, data, params) {
+      return await petService.updatePetLostData(id, data, params)
+    }
   })
   app.service('pet/pet-lost').hooks({
     before: {
-      create: [firebaseAuthHook()]
+      create: [firebaseAuthHook()],
+      patch: [firebaseAuthHook()]
     }
   })
 
@@ -51,4 +62,5 @@ module.exports = function (app) {
       return await petService.findPetLost(params)
     }
   })
+
 };

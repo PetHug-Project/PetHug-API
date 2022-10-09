@@ -12,8 +12,16 @@ exports.Pets = class Pets extends Service {
 
   async get(id, params) {
     let pet = await super.get(id, params)
+    pet.isOwner = false
+    if (params.decodeAccessToken) {
+      let { uid } = params.decodeAccessToken
+      let { _id: userId } = await this.app.service("users-service").getDataFromFirebaseUid(uid)
+      userId = userId.toString()
+      pet.isOwner = pet.owner.id == userId
+    }
     let petHistory = await this.app.service("pet-history-service").Model.find({ pet_id: pet._id.toString() })
     pet.pet_history = petHistory
+    delete pet.owner
     return pet
   }
 
@@ -162,6 +170,20 @@ exports.Pets = class Pets extends Service {
     result.limit = limit
     result.totalPage = Math.ceil(result.total / limit)
     result.currentPage = Math.ceil(skip / limit) + 1
+    return result
+  }
+
+  async updatePetLostData(id, data, params) {
+    // check is owner of petlost
+    let pet = await this.get(id, params)
+    if (!pet.isOwner) {
+      throw new BadRequest("You are not owner of this pet")
+    }
+    if (data) {
+      data.createdAt = pet.pet_lost_details.createdAt
+      data.updatedAt = dayjs().toDate()
+    }
+    let result = await super.Model.updateOne({ _id: ObjectId(id) }, { $set: { "pet_lost_details": data } })
     return result
   }
 
