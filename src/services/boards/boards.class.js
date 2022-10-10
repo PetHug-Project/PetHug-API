@@ -51,7 +51,6 @@ exports.Boards = class Boards extends Service {
       {
         $facet: {
           data: [
-            { $skip: skip },
             { $match: { board_name: { $regex: searchBar, $options: "i" } } },
             {
               $project: boardProjection
@@ -87,6 +86,7 @@ exports.Boards = class Boards extends Service {
                 as: "tag_names"
               }
             },
+            { $skip: skip },
             { $limit: limit },
           ],
           pageInfo: [
