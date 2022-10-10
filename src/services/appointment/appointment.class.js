@@ -38,7 +38,7 @@ exports.Appointment = class Appointment extends Service {
     let result = await super.Model.find({
       "datetime.start_at": {
         $lte: dayjs().add(1, 'day').toDate(),
-        $gte: dayjs().add(-1, 'minute').toDate(),
+        $gte: dayjs().add(-2, 'minute').toDate(),
       },
       status: PENDING,
       line_uid: { $exists: true } // Use only line appointment
@@ -84,7 +84,7 @@ exports.Appointment = class Appointment extends Service {
   }
 
   checkTimeValid(datetime) { // คือต้องเช็คว่ามากกว่า 1 วัน 5นาทีมั้ย
-    if (dayjs().add(1, 'day').add(5, "min").toDate() > datetime) {
+    if (dayjs().add(1, 'day').add(5, "minute").toDate() > datetime) {
       return false
     }
     return true

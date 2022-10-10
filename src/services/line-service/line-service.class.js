@@ -50,7 +50,7 @@ exports.LineService = class LineService {
     return result
   }
 
-  async sendFlexMessage(lineUid, appointName, appointDescription, appointmentDate, appointmentId) {
+  async sendFlexMessage(lineUid, appointName, appointLocation, appointmentDate, appointmentId) {
     let { start_at, end_at } = appointmentDate
     const altText = 'แจ้งเตือนการนัดหมายจาก PETHUG'
     await this.app.service('appointment-service').updateAppointmentNotification(appointmentId, SENDING)
@@ -104,7 +104,7 @@ exports.LineService = class LineService {
                       },
                       {
                         type: "text",
-                        text: appointDescription,
+                        text: appointLocation,
                         size: "sm",
                         color: "#666666",
                         flex: 3,

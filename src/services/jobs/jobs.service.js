@@ -1,4 +1,5 @@
 // Initializes the `jobs` service on path `/jobs`
+const dayjs = require('dayjs');
 const { Jobs } = require('./jobs.class');
 const hooks = require('./jobs.hooks');
 const Cronjob = require('cron').CronJob;
@@ -12,8 +13,15 @@ module.exports = function (app) {
   const jobsService = new Jobs(options, app);
   app.use('/jobs-service', jobsService);
 
+  app.use('/job-test', {
+    async find(params) {
+      await jobsService.findTodoJobs()
+      return []
+    }
+  })
+
   let job = new Cronjob("* * * * *", async () => {
-    console.log("You will see this message every min");
+    console.log(dayjs().format('YYYY-MM-DD HH:mm:ss'));
     await jobsService.findTodoJobs()
   })
 
