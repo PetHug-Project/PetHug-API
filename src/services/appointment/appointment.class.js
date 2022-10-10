@@ -9,7 +9,7 @@ exports.Appointment = class Appointment extends Service {
   }
 
   async create(data, params) {
-    let { datetime } = data;
+    let { datetime, usingLineAppointMent } = data;
     let { start_at, end_at } = datetime
     start_at = dayjs(start_at).second(0).millisecond(0).toDate();
     end_at = dayjs(end_at).second(0).millisecond(0).toDate();
@@ -19,15 +19,18 @@ exports.Appointment = class Appointment extends Service {
     }
     let { uid } = params.decodeAccessToken
     let user = await this.app.service("users-service").getDataFromFirebaseUid(uid)
-    if (!user.line_uid) {
-      throw new Error("User not verify line")
-    }
-    data.line_uid = user.line_uid
     data.user_id = user._id
     data.status = PENDING
     if (!this.checkTimeValid(start_at) && !this.checkTimeValid(end_at)) {
       throw new Error("Time is not valid")
     }
+    if (!usingLineAppointMent) { // ถ้าไม่ใช้ line ให้สร้างเป็น appointment ปกติ
+      return await super.create({ datetime, ...data }, params);
+    }
+    if (!user.line_uid) {
+      throw new Error("User not verify line")
+    }
+    data.line_uid = user.line_uid
     return await super.create({ datetime, ...data }, params);
   }
 
@@ -37,7 +40,8 @@ exports.Appointment = class Appointment extends Service {
         $lte: dayjs().add(1, 'day').toDate(),
         $gte: dayjs().add(-1, 'minute').toDate(),
       },
-      status: PENDING
+      status: PENDING,
+      line_uid: { $exists: true } // Use only line appointment
     })
     return result
   }
@@ -54,12 +58,12 @@ exports.Appointment = class Appointment extends Service {
       {
         $facet: {
           data: [
-            { $match: { user_id: userId } },
+            { $match: { user_id: userId, status: PENDING } },
             { $skip: skip },
             { $limit: limit },
           ],
           pageInfo: [
-            { $match: { user_id: userId } },
+            { $match: { user_id: userId, status: PENDING } },
             { $group: { _id: null, count: { $sum: 1 } } },
           ],
         }
