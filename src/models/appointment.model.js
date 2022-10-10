@@ -12,7 +12,7 @@ module.exports = function (app) {
     datetime: { type: Object, required: true },
     user_id: { type: String, required: true },
     status: { type: String, required: true },
-    line_uid: { type: String, required: true },
+    line_uid: { type: String },
   }, {
     timestamps: true
   });
