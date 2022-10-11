@@ -15,6 +15,8 @@ exports.Users = class Users extends Service {
     delete data.firebase_uid
     delete data.sign_in_provider
     delete data.__v
+    delete data.line_uid
+    delete data.role
   }
 
   async patch(id, data, params) {
@@ -69,7 +71,9 @@ exports.Users = class Users extends Service {
     if (!checkUser) {
       throw new Forbidden("Can't view this user")
     }
-    let user = await super.get(id, params)
+    let user = await super.Model.findOne({ _id: ObjectId(id) }, { pets: 0, __v: 0, firebase_uid: 0, role: 0 })
+    user = user.toObject()
+    user.isConnectLine = user.line_uid ? true : false
     this.modelProtector(user)
     return user
   }
