@@ -1,4 +1,4 @@
-const { BadRequest, Forbidden, NotFound, NotAuthenticated } = require('@feathersjs/errors');
+const { BadRequest, Forbidden, NotFound, NotAuthenticated, Conflict } = require('@feathersjs/errors');
 const { default: axios } = require('axios');
 const { Service } = require('feathers-mongoose');
 const { firebaseAdmin, firebaseAuth, firebaseApiKey } = require("../../utils/firebaseInit")
@@ -42,6 +42,15 @@ exports.Users = class Users extends Service {
     const defaultUserImage = "https://cdn-icons-png.flaticon.com/512/634/634741.png"
     if (!data.user_image) {
       data.user_image = defaultUserImage
+    }
+    let alreadyUser = await super.Model.findOne({ firebase_uid: data.firebase_uid }, { pets: 0, __v: 0, role: 0 })
+    if (alreadyUser) {
+      let providerExists = alreadyUser.sign_in_provider.find(provider => provider == data.sign_in_provider)
+      if (!providerExists) {
+        alreadyUser.sign_in_provider.push(data.sign_in_provider)
+        await super.Model.updateOne({ firebase_uid: data.firebase_uid }, { $set: { sign_in_provider: alreadyUser.sign_in_provider } })
+      }
+      return alreadyUser
     }
     return await super.create({ ...data })
   }
