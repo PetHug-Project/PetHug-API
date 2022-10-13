@@ -42,6 +42,14 @@ exports.LineService = class LineService {
     return { id };
   }
 
+  async updateRichMenu(data, params) {
+    let { uid } = params.decodeAccessToken
+    let { line_uid } = await this.app.service("users-service").getDataFromFirebaseUid(uid)
+    let richMenuId = this.app.get('line_rich_menu_logged_in')
+    await this.lineClient.linkRichMenuToUser(line_uid, richMenuId)
+    return { result: "SUCCESS" }
+  }
+
   async sendMessage(lineUid, message) {
     let result = await this.lineClient.pushMessage(lineUid, {
       type: 'text',

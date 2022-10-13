@@ -1,4 +1,5 @@
 // Initializes the `line-service` service on path `/line-service`
+const firebaseAuthHook = require('../../hooks/firebase-auth-hook');
 const { LineService } = require('./line-service.class');
 const hooks = require('./line-service.hooks');
 
@@ -19,4 +20,16 @@ module.exports = function (app) {
       return await lineService.sendMessage(data, params)
     }
   })
+
+  app.use('/update-rich-menu', {
+    async create(data, params) {
+      return await lineService.updateRichMenu(data, params)
+    }
+  })
+  app.service('update-rich-menu').hooks({
+    before: {
+      create: [firebaseAuthHook()]
+    }
+  })
+
 };
