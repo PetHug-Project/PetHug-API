@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+const { BadRequest } = require('@feathersjs/errors');
 const line = require('@line/bot-sdk');
 const dayjs = require('dayjs');
 const { SENDED, SENDING, FAILED } = require('../../constants/AppointmentStatus').STATUS;
@@ -43,8 +44,20 @@ exports.LineService = class LineService {
   }
 
   async updateRichMenu(data, params) {
-    let { uid } = params.decodeAccessToken
-    let { line_uid } = await this.app.service("users-service").getDataFromFirebaseUid(uid)
+    const userService = this.app.service("users-service")
+    let { uid: firebase_uid } = params.decodeAccessToken
+    let { line_uid } = data
+    let user = await userService.getDataFromFirebaseUid(firebase_uid)
+
+    if (line_uid && (user.line_uid != line_uid)) {
+      let result = await userService.Model.updateOne({ firebase_uid: firebase_uid }, { line_uid: line_uid })
+      if (result.modifiedCount > 0) {
+        await this.app.service('notification-service').createNotification({ connectedToLine: true, user: user })
+      }
+    }
+    if (!line_uid) {
+      throw new BadRequest("Line uid is required")
+    }
     let richMenuId = this.app.get('line_rich_menu_logged_in')
     await this.lineClient.linkRichMenuToUser(line_uid, richMenuId)
     return { result: "SUCCESS" }
