@@ -1,6 +1,6 @@
 const dayjs = require('dayjs');
 const { Service } = require('feathers-mongoose');
-const { PENDING } = require('../../constants/AppointmentStatus').STATUS;
+const { PENDING, SENDED, FAILED, SENDING } = require('../../constants/AppointmentStatus').STATUS;
 
 exports.Appointment = class Appointment extends Service {
   constructor(options, app) {
@@ -47,7 +47,20 @@ exports.Appointment = class Appointment extends Service {
   }
 
   async findAppointment(params) {
-    let { limit = 10, skip = 0 } = params.query
+    let { limit = 10, skip = 0, condition = "pending" } = params.query
+    let matchCondition = {
+      status: PENDING
+    }
+    if (condition == "past") {
+      matchCondition = {
+        status: {
+          $in: [SENDED, FAILED, SENDING]
+        }
+      }
+    }
+    if (condition == "all") {
+      matchCondition = {}
+    }
     limit = Number(limit)
     skip = Number(skip)
     let { uid } = params.decodeAccessToken
@@ -58,13 +71,13 @@ exports.Appointment = class Appointment extends Service {
       {
         $facet: {
           data: [
-            { $match: { user_id: userId } },
+            { $match: { user_id: userId, ...matchCondition } },
             { $sort: { "datetime.start_at": -1 } },
             { $skip: skip },
             { $limit: limit },
           ],
           pageInfo: [
-            { $match: { user_id: userId } },
+            { $match: { user_id: userId, ...matchCondition } },
             { $group: { _id: null, count: { $sum: 1 } } },
           ],
         }
