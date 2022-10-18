@@ -58,12 +58,13 @@ exports.Appointment = class Appointment extends Service {
       {
         $facet: {
           data: [
-            { $match: { user_id: userId, status: PENDING } },
+            { $match: { user_id: userId } },
+            { $sort: { "datetime.start_at": -1 } },
             { $skip: skip },
             { $limit: limit },
           ],
           pageInfo: [
-            { $match: { user_id: userId, status: PENDING } },
+            { $match: { user_id: userId } },
             { $group: { _id: null, count: { $sum: 1 } } },
           ],
         }
