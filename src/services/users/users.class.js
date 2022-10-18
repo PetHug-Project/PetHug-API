@@ -57,10 +57,13 @@ exports.Users = class Users extends Service {
 
   async loginUser(data, params) {
     let { firebase_uid, line_uid } = data
-    if (line_uid) {
-      await super.Model.updateOne({ firebase_uid: firebase_uid }, { line_uid: line_uid })
-    }
     let user = await super.Model.findOne({ firebase_uid: firebase_uid })
+    if (line_uid) {
+      let result = await super.Model.updateOne({ firebase_uid: firebase_uid }, { line_uid: line_uid })
+      if (result.modifiedCount > 0) {
+        await this.app.service('notification-service').createNotification({ connectedToLine: true, user: user })
+      }
+    }
     return { _id: user._id, fname: user.fname, lname: user.lname, user_image: user.user_image, email: user.email, sign_in_provider: user.sign_in_provider }
   }
 

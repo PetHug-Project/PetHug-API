@@ -110,7 +110,18 @@ exports.Notification = class Notification extends Service {
   }
 
   async createNotification(data, params) {
-    let { type, user, boardData } = data
+    let { type, user, boardData, connectedToLine } = data
+    if (connectedToLine) {
+      let { _id: userId } = user
+      userId = userId.toString()
+      await this.create({
+        user_id: userId,
+        notification_status: NotificationStatus.UNREAD,
+        notification_type: "LINE",
+        notification_from: "SYSTEM",
+      })
+      return
+    }
     let { user_id: ownerId } = boardData
     let { _id: userId } = user
     userId = userId.toString()
