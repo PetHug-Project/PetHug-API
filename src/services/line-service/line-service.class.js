@@ -75,6 +75,10 @@ exports.LineService = class LineService {
     let { start_at, end_at } = appointmentDate
     const altText = 'แจ้งเตือนการนัดหมายจาก PETHUG'
     await this.app.service('appointment-service').updateAppointmentNotification(appointmentId, SENDING)
+    let timeMessage = `${dayjs(start_at).format('HH:mm')}`
+    if (end_at) {
+      timeMessage = `${dayjs(start_at).format('HH:mm')} - ${dayjs(end_at).format('HH:mm')}`
+    }
     let result
     try {
       result = await this.lineClient.pushMessage(lineUid, {
@@ -169,7 +173,7 @@ exports.LineService = class LineService {
                       },
                       {
                         type: "text",
-                        text: `${dayjs(start_at).format('HH:mm')} - ${dayjs(end_at).format('HH:mm')}`,
+                        text: timeMessage,
                         size: "sm",
                         color: "#666666",
                         flex: 3,

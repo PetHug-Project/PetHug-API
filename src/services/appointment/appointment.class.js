@@ -1,3 +1,4 @@
+const { BadRequest } = require('@feathersjs/errors');
 const dayjs = require('dayjs');
 const { Service } = require('feathers-mongoose');
 const { PENDING, SENDED, FAILED, SENDING } = require('../../constants/AppointmentStatus').STATUS;
@@ -12,16 +13,24 @@ exports.Appointment = class Appointment extends Service {
     let { datetime, usingLineAppointMent } = data;
     let { start_at, end_at } = datetime
     start_at = dayjs(start_at).second(0).millisecond(0).toDate();
-    end_at = dayjs(end_at).second(0).millisecond(0).toDate();
     data.datetime = {
-      start_at,
-      end_at
+      start_at
+    }
+    if (end_at) {
+      end_at = dayjs(end_at).second(0).millisecond(0).toDate();
+      data.datetime.end_at = end_at
     }
     let { uid } = params.decodeAccessToken
     let user = await this.app.service("users-service").getDataFromFirebaseUid(uid)
     data.user_id = user._id
     data.status = PENDING
-    if (!this.checkTimeValid(start_at) && !this.checkTimeValid(end_at)) {
+
+    // Check start time valid
+    if (!this.checkTimeValid(start_at)) {
+      throw new BadRequest("Start time is invalid")
+    }
+
+    if (end_at && !this.checkTimeValid(start_at) && !this.checkTimeValid(end_at)) {
       throw new Error("Time is not valid")
     }
     if (!usingLineAppointMent) { // ถ้าไม่ใช้ line ให้สร้างเป็น appointment ปกติ
