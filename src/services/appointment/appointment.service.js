@@ -28,6 +28,17 @@ module.exports = function (app) {
     }
   })
 
+  app.use('/delete-appointment', {
+    async remove(id, params) {
+      return await appointmentService.deleteAppointment(id, params);
+    }
+  })
+  app.service('/delete-appointment').hooks({
+    before: {
+      remove: [firebaseAuthHook()]
+    }
+  })
+
   app.use('/find-appointment', {
     async find(data, params) {
       return await appointmentService.findAppointment(data, params);

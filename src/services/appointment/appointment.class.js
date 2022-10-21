@@ -124,4 +124,8 @@ exports.Appointment = class Appointment extends Service {
     return result
   }
 
+  async deleteAppointment(appointmentId) {
+    let result = await super.remove(appointmentId)
+    return result
+  }
 };
