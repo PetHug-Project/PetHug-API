@@ -63,15 +63,15 @@ exports.LineService = class LineService {
     return { result: "SUCCESS" }
   }
 
-  async sendMessage(lineUid, message) {
-    let result = await this.lineClient.pushMessage(lineUid, {
-      type: 'text',
-      text: message
-    });
-    return result
+  async sendMessage(data, params) {
+    let { lineUid, appointName, appointLocation, appointmentDate, appointmentId } = data
+    await this.sendFlexMessage(lineUid, appointName, appointLocation, appointmentDate, appointmentId)
   }
 
-  async sendFlexMessage(lineUid, appointName, appointLocation = "-", appointmentDate, appointmentId) {
+  async sendFlexMessage(lineUid, appointName, appointLocation, appointmentDate, appointmentId) {
+    if (!appointLocation) {
+      appointLocation = "-"
+    }
     let { start_at, end_at } = appointmentDate
     const altText = 'แจ้งเตือนการนัดหมายจาก PETHUG'
     await this.app.service('appointment-service').updateAppointmentNotification(appointmentId, SENDING)
