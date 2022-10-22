@@ -27,7 +27,7 @@ exports.Appointment = class Appointment extends Service {
 
     // Check start time valid
     if (!this.checkTimeValid(start_at)) {
-      throw new BadRequest("Start time is invalid")
+      throw new BadRequest("เวลาเริ่มควรมากกว่าเวลานัด 1 วัน 5 นาที")
     }
 
     if (end_at && !this.checkTimeValid(start_at) && !this.checkTimeValid(end_at)) {
