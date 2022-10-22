@@ -11,6 +11,7 @@ exports.Notification = class Notification extends Service {
     let { uid } = params.decodeAccessToken
     let { skip = 0, limit = 10 } = params.query
     skip = Number(skip)
+    console.log("🚀 ~ file: notification.class.js ~ line 14 ~ Notification ~ findNotificationByUserId ~ skip", skip)
     limit = Number(limit)
 
     let user = await this.app.service("users-service").getDataFromFirebaseUid(uid)
@@ -76,8 +77,8 @@ exports.Notification = class Notification extends Service {
                 user: 0,
               }
             },
-            { $skip: 0 },
-            { $limit: 10 }
+            { $skip: skip },
+            { $limit: limit }
           ],
           pageInfo: [
             {
