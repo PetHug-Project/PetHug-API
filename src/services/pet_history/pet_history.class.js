@@ -13,7 +13,7 @@ exports.PetHistory = class PetHistory extends Service {
     if (!pet) {
       throw new BadRequest("Pet not found")
     }
-    if (!pet.isOwner || !data.veterinary) {
+    if (!pet.isOwner && !data.veterinary) {
       throw new BadRequest("You are not owner of this pet")
     }
     let result = await super.create(data, params)
