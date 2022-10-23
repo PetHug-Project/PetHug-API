@@ -19,6 +19,7 @@ module.exports = function (app) {
     firebase_uid: { type: String, required: true, unique: true },
     sign_in_provider: { type: Array, required: true },
     line_uid: { type: String, default: "" },
+    veterinary_place: { type: String, default: "" },
   }, {
     timestamps: true,
     collection: 'users'

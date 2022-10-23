@@ -187,4 +187,26 @@ exports.Pets = class Pets extends Service {
     return result
   }
 
+  async veterinarianAddPetHistory(data, params) {
+    let { pet_id, pet_history } = data
+    let { uid } = params.decodeAccessToken
+    let { _id: userId } = await this.app.service("users-service").getDataFromFirebaseUid(uid)
+    userId = userId.toString()
+
+    pet_history['pet_id'] = pet_id
+
+    let result = await this.app.service('pet-history-service').addPetHistory({ ...pet_history, user_id: userId, veterinary: true }, { ...params, query: { pet_id } })
+    return result
+  }
+
+  async veterinarianGetPetHistory(params) {
+    let { pet_id } = params.query
+    if (!pet_id) {
+      throw new BadRequest("pet_id is required")
+    }
+    let petDetail = await this.Model.findById(pet_id, { pet_history: 0 })
+    let petHistory = await this.app.service('pet-history-service').getPetHistoryWithVeterinaryData(params)
+    return { petDetail, petHistory }
+  }
+
 };

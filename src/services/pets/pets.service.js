@@ -3,7 +3,8 @@ const { Pets } = require('./pets.class');
 const createModel = require('../../models/pets.model');
 const hooks = require('./pets.hooks');
 const firebaseAuthHook = require('../../hooks/firebase-auth-hook');
-const notRequireLogin = require("../../hooks/notRequiredLogin")
+const notRequireLogin = require("../../hooks/notRequiredLogin");
+const checkRole = require('../../hooks/checkRole');
 
 module.exports = function (app) {
   const options = {
@@ -62,5 +63,28 @@ module.exports = function (app) {
       return await petService.findPetLost(params)
     }
   })
+
+  app.use('/veterinary/addPetHistory', {
+    async create(data, params) {
+      return await petService.veterinarianAddPetHistory(data, params)
+    }
+  })
+  app.service('veterinary/addPetHistory').hooks({
+    before: {
+      create: [firebaseAuthHook(), checkRole(["veterinarian"])]
+    }
+  })
+
+  app.use('/veterinary/getPetHistory', {
+    async find(params) {
+      return await petService.veterinarianGetPetHistory(params)
+    }
+  })
+  app.service('veterinary/getPetHistory').hooks({
+    before: {
+      find: [firebaseAuthHook(), checkRole(["veterinarian"])]
+    }
+  })
+
 
 };

@@ -20,6 +20,7 @@ exports.Users = class Users extends Service {
   }
 
   async patch(id, data, params) {
+    delete data.role
     let checkUser = await this.checkUser(id, params)
     if (!checkUser) {
       throw new Forbidden("Can't edit this user")
@@ -145,5 +146,19 @@ exports.Users = class Users extends Service {
     let accessToken = userFirebase.toJSON().stsTokenManager.accessToken
     let user = await this.loginUser({ firebase_uid: userFirebase.uid }, params)
     return { user, accessToken }
+  }
+
+  async checkRole(firebaseUid, roles = []) {
+    let user = await super.Model.findOne({ firebase_uid: firebaseUid }, { role: 1 })
+    if (!user) {
+      throw new NotFound("User not found")
+    }
+    if (roles.length != 0) {
+      let roleExists = roles.find(role => role == user.role)
+      if (!roleExists) {
+        throw new Forbidden("You don't have permission to access this page")
+      }
+    }
+    return true
   }
 };
