@@ -111,8 +111,8 @@ exports.Pets = class Pets extends Service {
   }
 
   async findPetLost(params) {
-    let { limit = 3, sort = "desc", skip = 0, search = "" } = params.query
-    sort = sort == "desc" ? -1 : 1
+    let { limit = 3, sort = "asc", skip = 0, search = "" } = params.query
+    sort = sort == "desc" ? 1 : -1
     limit = Number(limit)
     skip = Number(skip)
     let result = await super.Model.aggregate([
