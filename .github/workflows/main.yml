@@ -23,3 +23,29 @@ jobs:
 
       - name: Push Docker image to Github Container registry
         run: docker push ghcr.io/pethug-project/pethug-project-api:latest
+
+  deploy:
+    runs-on: "ubuntu-latest"
+    needs: build
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Login to Github Container Registy
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.ACCOUNT }}
+          password: ${{ secrets.TOKEN_GITHUB }}
+
+      - name: Deploy to Prod Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.MAIN_SSH_HOST }}
+          username: ${{ secrets.MAIN_SSH_USERNAME }}
+          key: ${{ secrets.MAIN_SSH_KEY }}
+          script: |
+            docker pull ghcr.io/pethug-project/pethug-project-api:latest
+            docker stop api
+            docker rm api
+            docker-compose up -d
