@@ -5,5 +5,10 @@
   "paginate": {
     "default": 10,
     "max": 50
-  }
+  },
+  "mongodb": "",
+  "storage_bucket": "",
+  "line_channel_id": "",
+  "line_channel_secret": "",
+  "line_channel_access_token": ""
 }

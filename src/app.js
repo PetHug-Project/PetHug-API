@@ -15,15 +15,29 @@ const services = require('./services')
 const appHooks = require('./app.hooks')
 const channels = require('./channels')
 
+const mongoose = require('./mongoose');
+
 const app = express(feathers())
 
 // Load app configuration
 app.configure(configuration())
+
 // Enable security, CORS, compression, favicon and body parsing
 app.use(helmet({
   contentSecurityPolicy: false
 }))
-app.use(cors())
+
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "PUT", "POST", "PATCH", "DELETE", "OPTIONS"],
+  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'device-remember-token', 'Access-Control-Allow-Origin', 'Origin', 'Accept', 'user_id'],
+  credentials: true, //Credentials are cookies, authorization headers or TLS client certificates.
+}))
+
+// include before other routes
+app.options('*', cors())
+
 app.use(compress())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -31,9 +45,21 @@ app.use(favicon(path.join(app.get('public'), 'favicon.ico')))
 // Host the public folder
 app.use('/', express.static(app.get('public')))
 
+// Health Check
+app.get('/health', (req, res) => {
+  return res.status(200).send({ status: 'Healthy' })
+})
+
+app.get('/version', (req, res) => {
+  let version = require('../package.json').version
+  return res.send({ version: version })
+})
+
 // Set up Plugins and providers
 app.configure(express.rest())
 app.configure(socketio())
+
+app.configure(mongoose);
 
 // Configure other middleware (see `middleware/index.js`)
 app.configure(middleware)

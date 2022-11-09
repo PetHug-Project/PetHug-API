@@ -1,0 +1,6 @@
+exports.STATUS = {
+  PENDING: "PENDING",
+  SENDING: "SENDING",
+  SENDED: "SENDED",
+  FAILED: "FAILED",
+}
