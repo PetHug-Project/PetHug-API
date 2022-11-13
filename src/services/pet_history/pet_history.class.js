@@ -130,4 +130,9 @@ exports.PetHistory = class PetHistory extends Service {
     return result
   }
 
+  async deletePetHistoryByPetId(petId) {
+    let result = await super.Model.deleteMany({ pet_id: petId })
+    return result
+  }
+
 };

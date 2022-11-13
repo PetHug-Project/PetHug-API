@@ -209,4 +209,17 @@ exports.Pets = class Pets extends Service {
     return { petDetail, petHistory }
   }
 
+  async removePet(petId, params) {
+    let { uid } = params.decodeAccessToken
+    let { _id: userId } = await this.app.service("users-service").getDataFromFirebaseUid(uid)
+    userId = userId.toString()
+    let pet = await this.get(petId, params)
+    if (!pet.isOwner) {
+      throw new BadRequest("You are not owner of this pet")
+    }
+    let result = await super.Model.deleteOne({ _id: ObjectId(petId) })
+    await this.app.service("pet-history-service").deletePetHistoryByPetId(petId)
+    return result
+  }
+
 };

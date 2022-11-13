@@ -28,6 +28,9 @@ module.exports = function (app) {
     },
     async patch(id, data, params) {
       return await petService.patch(id, data, params)
+    },
+    async remove(id, params) {
+      return await petService.removePet(id, params)
     }
   })
 
