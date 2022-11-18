@@ -222,4 +222,19 @@ exports.Pets = class Pets extends Service {
     return result
   }
 
+  async createPetDeath(data, params) {
+    let { pet_id } = data
+    let { uid } = params.decodeAccessToken
+    let { _id: userId } = await this.app.service("users-service").getDataFromFirebaseUid(uid)
+    userId = userId.toString()
+
+    let pet = await this.get(pet_id, params)
+    if (!pet.isOwner) {
+      throw new BadRequest("You are not owner of this pet")
+    }
+
+    let result = await super.Model.updateOne({ _id: ObjectId(pet_id) }, { is_pet_death: true, pet_death_date: Date.now() })
+    return result
+  }
+
 };

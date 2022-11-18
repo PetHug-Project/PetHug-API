@@ -20,6 +20,8 @@ module.exports = function (app) {
     qr_code_for_show: { type: String, default: "" },
     pet_health_note: { type: String, default: "" },
     pet_lost_details: { type: Object, default: {} },
+    is_pet_death: { type: Boolean, default: false },
+    pet_death_date: { type: Date, default: null },
   })
 
   // This is necessary to avoid model compilation errors in watch mode
