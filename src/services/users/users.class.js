@@ -161,4 +161,14 @@ exports.Users = class Users extends Service {
     }
     return true
   }
+
+  async updateRole(id, data, params) {
+    let { uid } = params.decodeAccessToken
+    let user = await super.Model.findOne({ firebase_uid: uid })
+    if (!user) {
+      throw new NotFound("User not found")
+    }
+    await super.Model.updateOne({ firebase_uid: uid }, { $set: { role: data.role } })
+    return { message: "Update role success" }
+  }
 };

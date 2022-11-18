@@ -204,7 +204,7 @@ exports.Pets = class Pets extends Service {
     if (!pet_id) {
       throw new BadRequest("pet_id is required")
     }
-    let petDetail = await this.Model.findById(pet_id, { pet_history: 0 })
+    let petDetail = await this.Model.findById(ObjectId(pet_id), { pet_history: 0 })
     let petHistory = await this.app.service('pet-history-service').getPetHistoryWithVeterinaryData(params)
     return { petDetail, petHistory }
   }

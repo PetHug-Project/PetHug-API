@@ -197,7 +197,7 @@ exports.LineService = class LineService {
                 action: {
                   type: "uri",
                   label: "WEBSITE",
-                  uri: "https://dev.pethug-project.com/"
+                  uri: "https://www.pethug-project.com/"
                 },
                 height: "sm",
                 style: "link"

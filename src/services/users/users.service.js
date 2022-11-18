@@ -73,4 +73,15 @@ module.exports = function (app) {
       return await userService.loginWithEmail(data, params)
     }
   })
+
+  app.use('/auth/update-role', {
+    async patch(id, data, params) {
+      return await userService.updateRole(id, data, params)
+    }
+  })
+  app.service('/auth/update-role').hooks({
+    before: {
+      patch: [firebaseAuthHook()],
+    }
+  })
 };
