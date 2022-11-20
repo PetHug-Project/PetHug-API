@@ -62,11 +62,13 @@ exports.Pets = class Pets extends Service {
     let pets = await super.find({
       query: {
         "owner.id": userID,
-        $select: ["pet_image", "pet_name", "pet_birthdate", "isLost"]
+        $select: ["pet_image", "pet_name", "pet_birthdate", "isLost", "is_pet_death", "pet_death_date"]
       }
     })
     pets.data = pets.data.map(pet => {
       pet.age = this.calculateAge(pet.pet_birthdate)
+      pet.is_pet_death = pet.is_pet_death || false
+      pet.pet_death_date = pet.pet_death_date || null
       return pet
     })
     return pets
