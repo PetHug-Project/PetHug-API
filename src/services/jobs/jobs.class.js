@@ -1,8 +1,19 @@
 /* eslint-disable no-unused-vars */
+const nodemailer = require('nodemailer');
+
 exports.Jobs = class Jobs {
   constructor(options, app) {
     this.options = options || {};
     this.app = app
+    this.transport = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: this.app.get('pethug_email'),
+        pass: this.app.get('pethug_app_password'),
+      }
+    })
   }
 
   async find(params) {
@@ -25,6 +36,19 @@ exports.Jobs = class Jobs {
       appointmentId = appointmentId.toString()
       await this.app.service('line-service').sendFlexMessage(line_uid, name, location, datetime, appointmentId)
     }
+  }
+
+  async sendSuggestion(data, params) {
+    const { suggestionTopic, suggestionDetails } = data
+    this.transport.sendMail({
+      from: '"Pethug_USER"',
+      to: "pethug.project@gmail.com",
+      subject: `คำแนะนำจากผู้ใช้งาน ( ${suggestionTopic} )`, // หัวข้ออีเมล
+      html: `<h1>คำแนะนำจากผู้ใช้งานในด้าน : ${suggestionTopic}</h1>
+      <p>${suggestionDetails}</p>
+      `
+    })
+    return { message: "Send Suggestion" }
   }
 
 };

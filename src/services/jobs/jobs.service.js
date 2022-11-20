@@ -20,6 +20,12 @@ module.exports = function (app) {
     }
   })
 
+  app.use('/send-suggestion', {
+    async create(data, params) {
+      return await jobsService.sendSuggestion(data, params)
+    }
+  })
+
   let job = new Cronjob("* * * * *", async () => {
     console.log(dayjs().format('YYYY-MM-DD HH:mm:ss'));
     await jobsService.findTodoJobs()
