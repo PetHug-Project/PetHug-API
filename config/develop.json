@@ -2,10 +2,12 @@
   "host": "HOST",
   "port": "PORT",
   "mongodb": "MONGO_URL",
-  "web_host": "https://www.pethug-project.com",
+  "web_host": "WEB_HOST",
   "storage_bucket": "STORAGE_BUCKET",
   "line_channel_id": "LINE_CHANNEL_ID",
   "line_channel_secret": "LINE_CHANNEL_SECRET",
   "line_channel_access_token": "LINE_CHANNEL_ACCESS_TOKEN",
-  "line_rich_menu_logged_in": "LINE_RICH_MENU_LOGGED_IN"
+  "line_rich_menu_logged_in": "LINE_RICH_MENU_LOGGED_IN",
+  "pethug_email": "PETHUG_EMAIL",
+  "pethug_app_password": "PETHUG_APP_PASSWORD"
 }

@@ -62,11 +62,13 @@ exports.Pets = class Pets extends Service {
     let pets = await super.find({
       query: {
         "owner.id": userID,
-        $select: ["pet_image", "pet_name", "pet_birthdate", "isLost"]
+        $select: ["pet_image", "pet_name", "pet_birthdate", "isLost", "is_pet_death", "pet_death_date"]
       }
     })
     pets.data = pets.data.map(pet => {
       pet.age = this.calculateAge(pet.pet_birthdate)
+      pet.is_pet_death = pet.is_pet_death || false
+      pet.pet_death_date = pet.pet_death_date || null
       return pet
     })
     return pets
@@ -219,6 +221,21 @@ exports.Pets = class Pets extends Service {
     }
     let result = await super.Model.deleteOne({ _id: ObjectId(petId) })
     await this.app.service("pet-history-service").deletePetHistoryByPetId(petId)
+    return result
+  }
+
+  async createPetDeath(data, params) {
+    let { pet_id } = data
+    let { uid } = params.decodeAccessToken
+    let { _id: userId } = await this.app.service("users-service").getDataFromFirebaseUid(uid)
+    userId = userId.toString()
+
+    let pet = await this.get(pet_id, params)
+    if (!pet.isOwner) {
+      throw new BadRequest("You are not owner of this pet")
+    }
+
+    let result = await super.Model.updateOne({ _id: ObjectId(pet_id) }, { is_pet_death: true, pet_death_date: Date.now() })
     return result
   }
 

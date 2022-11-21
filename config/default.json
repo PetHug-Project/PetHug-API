@@ -11,5 +11,7 @@
   "line_channel_id": "",
   "line_channel_secret": "",
   "line_channel_access_token": "",
-  "line_rich_menu_logged_in": ""
+  "line_rich_menu_logged_in": "",
+  "pethug_email": "",
+  "pethug_app_password": ""
 }

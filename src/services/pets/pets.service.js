@@ -89,5 +89,16 @@ module.exports = function (app) {
     }
   })
 
+  app.use('/pet/death', {
+    async create(data, params) {
+      return await petService.createPetDeath(data, params)
+    }
+  })
+  app.service('pet/death').hooks({
+    before: {
+      create: [firebaseAuthHook()]
+    }
+  })
+
 
 };
