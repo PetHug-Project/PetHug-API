@@ -40,10 +40,6 @@ exports.Users = class Users extends Service {
   }
 
   async registerUser(data, params) {
-    const defaultUserImage = "https://cdn-icons-png.flaticon.com/512/634/634741.png"
-    if (!data.user_image) {
-      data.user_image = defaultUserImage
-    }
     let alreadyUser = await super.Model.findOne({ firebase_uid: data.firebase_uid }, { pets: 0, __v: 0, role: 0 })
     if (alreadyUser) {
       let providerExists = alreadyUser.sign_in_provider.find(provider => provider == data.sign_in_provider)
